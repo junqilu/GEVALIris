@@ -37,6 +37,10 @@ function average_array_num(input_array_num) { //input_array_num is an array of n
     }
 }
 
+function convert_to_32_bit() { //You have to do this to have float results (32-bit) on the heatmap after the image division
+    run("32-bit"); //Convert image type from 16-bit to 32-bit. This applies to all the slices in the stack
+}
+
 
 
 
@@ -166,5 +170,41 @@ macro "clean_background [c]" {
     //The Results table and the Log are for debugging. Normally I don't need to see them since after the background subtraction, I can tell it's successful by seeing lots of 0-value pixels in the background
     close("Results");
     close("Log");
+}
+
+
+
+
+
+//Functions for set background to NaN
+function median_filter(radius_num) { //Smooth out the fuzziness
+    for (i = 1; i < nSlices + 1; i++) {
+        if (i <= 2) { //Skip the last slice, which is the bright-field
+            setSlice(i);
+            run("Median...", "radius=" + radius_num + " slice"); //The slice option limits the changes to that specific slice
+        }
+    }
+}
+
+function set_background_to_NaN_core() {
+    /* setAutoThreshold("Otsu dark no-reset");
+    run("NaN Background", "slice"); */
+    //The lines above run things very fast without giving you a chance to adjust things manually so I commented them out
+
+    run("Threshold..."); //This gives you a way to adjust the thresholding
+
+    //Adjust the threshold
+    waitForUser("Adjust the threshold and hit OK"); //Hitting OK will make the run the next line, which is to make the non-selected part as NaN automatically
+    //The threshold window will also have an Apply button. Don't hit on that
+
+    run("NaN Background", "slice");
+    close("Threshold");
+}
+
+
+macro "set_background_to_NaN [x]" {
+    convert_to_32_bit(); //Be ready for the later image division. This allows the 32-bit data type, aka float
+    median_filter(2); //Dave likes to use radius = 2 for the median filter
+    set_background_to_NaN_core();
 }
 
