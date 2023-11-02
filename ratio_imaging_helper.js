@@ -70,26 +70,56 @@ function locate_image_by_regex(regex_str){//You should only find 1 unique image 
     }
 }
 
+function judge_substr_in_str(substr, str){ //Judge whether the str contains a substr
+    if (matches(str, ".*"+substr+".*")){
+        return true;
+
+    }else {
+        return false;
+    }
+}
+
 function save_image (save_directory,image_name_str, format_str){
     //To keep things simple, image_name_str will be the image window's title but also the filename when save the image locally
 
     //Translate format_str into the corresponding file extension
     if (format_str == "Tiff") {
-        file_extension = ".tif";
+        file_extension = ".tif"; //This is the raw image format, and it has no colors. But it can be import back to ImageJ for further adjustment
     }else if (format_str == "Jpeg") {
-        file_extension = ".jpg";
-    }else {
+        file_extension = ".jpg"; //This is for the display and presentation etc since it has colors. You can further adjust this image but it'll be different from what it looks like if you do it within ImageJ all the way without the exporting and importing
+    } else {
         //Do nothing
         //You can keep adding more translation on the file formats here
     }
 
     saveAs(format_str, save_directory+image_name_str+file_extension);
+    rename_image(image_name_str+file_extension, image_name_str); //Rename the image back to get rid of the file extension part. This makes the referencing easier in later steps
 }
 
 function save_images(save_directory,image_name_str, format_array){
     for (i = 0; i < format_array.length; i++){
         save_image(save_directory,image_name_str,format_array[i]);
     }
+}
+
+
+function rename_image(original_name_str, new_name_str) {
+    if (isOpen(original_name_str)){ //You only rename the image if it is currently opened. This can avoid some errors
+        selectImage(original_name_str);
+        rename(new_name_str);
+        return new_name_str;
+    }else{
+        print("No window for "+original_name_str+" was found so cannot rename it!");
+    }
+}
+
+function merge_two_images (image_name_str_1, image_name_str_2){
+    run("Merge Channels...", "c1=["+image_name_str_1+"] c2="+image_name_str_2+" create keep");
+    //"create" means to check for "Create composite"
+    //"keep" means to check for "Keep source images"
+
+    new_image_name = rename_image("Composite", "Composite of "+image_name_str_1+" and "+image_name_str_2);
+    return new_image_name; //By returning rename_image, I can relocate the image I want really easily
 }
 
 
@@ -285,10 +315,7 @@ function apply_LUT(input_image_str, LUT_name_str) {
     run("Enhance Contrast", "saturated=0.35"); //Do some auto-contrast
 }
 
-function rename_image(original_name_str, new_name_str) {
-    selectImage(original_name_str);
-    rename(new_name_str);
-}
+
 
 
 
@@ -305,14 +332,31 @@ macro "heatmap_generation_and_save [h]" {
 
     result_image = locate_image_by_regex("^Result.*"); //Image's name starts with "Result"
     apply_LUT(result_image, "mpl-inferno"); //Apply the mpl-inferno style to the heatmap
-    rename_image(result_image, "Result of " + stack_title);
+    rename_image(result_image, "Heatmap of " + stack_title);
 
     save_directory = "C:\\Users\\louie\\Desktop\\Fiji_output\\";
-    image_name_str = locate_image_by_regex("^Result.*");
+    image_name_str = locate_image_by_regex("^Heatmap.*");
     format_array = newArray("Tiff", "Jpeg");
     save_images(save_directory, image_name_str, format_array);
-
 }
+
+
+
+
+//Functions for merging heatmap and bright-field
+macro "overlay_heatmap_on_brightfield_and save [o]"{
+    heatmap_image = locate_image_by_regex("^Heatmap.*");
+    brightfield_image = locate_image_by_regex(".*brightfield$");
+
+    heatmap_merge_brightfield_image = merge_two_images(heatmap_image, brightfield_image);
+
+    save_directory = "C:\\Users\\louie\\Desktop\\Fiji_output\\";
+    image_name_str = locate_image_by_regex(heatmap_merge_brightfield_image);
+    format_array = newArray("Tiff", "Jpeg");
+    save_images(save_directory, image_name_str, format_array);
+    close(heatmap_merge_brightfield_image);
+}
+
 
 
 
