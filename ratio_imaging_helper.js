@@ -14,6 +14,15 @@
 
 //Basic functions
 //This section contains basic functions that will be used in other functions
+function get_stack_name(){ //Obtain the stack name from the current window
+    //This may not be reliable when you have multiple windows since it seems like to just get the title from the current activated window
+    stack_title = getTitle();
+    stack_name_array = split(stack_title, "."); //file_name is an array
+    stack_name = stack_name_array[0];
+
+    return stack_name;
+}
+
 function print_array(input_array) { //Iterate through input_array to print out each value. This is for debugging
     for (i = 0; i < input_array.length; i++) {
         print(input_array[i]);
@@ -41,6 +50,26 @@ function convert_to_32_bit() { //You have to do this to have float results (32-b
     run("32-bit"); //Convert image type from 16-bit to 32-bit. This applies to all the slices in the stack
 }
 
+function locate_image_by_regex(regex_str){//You should only find 1 unique image from this function
+    found_match = false;
+
+    images = getList("image.titles");
+    for (i = 0; i < images.length; i++) { //Iterate through all opened images
+        if (matches(images[i], regex_str)) {
+            output_image = images[i];
+            found_match = true;
+        } else {
+            //Do nothing
+        }
+    }
+
+    if (found_match) {
+        return output_image; //This should be a string for the image's name
+    }else {
+        return "No match imaged found!";
+    }
+}
+
 
 
 
@@ -48,9 +77,7 @@ function convert_to_32_bit() { //You have to do this to have float results (32-b
 //Functions for better display and slice renaming
 //These functions are automatic
 function rename_slices(){
-    stack_title = getTitle();
-    filename_array = split(stack_title, "."); //file_name is an array
-    filename = filename_array[0];
+    filename = get_stack_name();
 
     //1st slice is the 405 nm image
     setSlice(1);
@@ -207,4 +234,57 @@ macro "set_background_to_NaN [x]" {
     median_filter(2); //Dave likes to use radius = 2 for the median filter
     set_background_to_NaN_core();
 }
+
+
+
+
+
+
+
+//Functions for image division and generating heatmap
+function stack_to_images() {
+    //Image calculator requires you to split a stack into slices
+    run("Stack to Images"); // Split a stack into images
+}
+
+function image_division(input_image_str_1, input_image_str_2) {
+    imageCalculator("Divide create 32-bit", input_image_str_1, input_image_str_2);
+    //"Divide" means division
+    //"create" means to check the box for "Create new window"
+    //"32-bit" means to check the box for "32-bit (float) result". This is why you need to change the image type to 32-bit previously
+
+    close("Image Calculator");
+}
+
+
+function apply_LUT(input_image_str, LUT_name_str) {
+    selectImage(input_image_str);
+    run(LUT_name_str);
+
+    run("Enhance Contrast", "saturated=0.35"); //Do some auto-contrast
+}
+
+function rename_image(original_name_str, new_name_str) {
+    selectImage(original_name_str);
+    rename(new_name_str);
+}
+
+macro "generate_ratio_heatmap [h]" {
+    stack_title = get_stack_name();
+
+    stack_to_images(); //You have to split to use the image calculator
+
+    image_1 = locate_image_by_regex(".*405$"); //Image's name ends with 405
+    image_2 = locate_image_by_regex(".*488$"); //Image's name ends with 488
+
+    image_division(image_1, image_2);
+
+    result_img = locate_image_by_regex("^Result.*"); //Image's name starts with "Result"
+
+    apply_LUT(result_img, "mpl-inferno"); //Apply the mpl-inferno style to the heatmap
+
+    rename_image(result_img, "Result of " + stack_title);
+}
+
+
 
