@@ -104,12 +104,15 @@ function save_images(save_directory,image_name_str, format_array){
 
 
 function rename_image(original_name_str, new_name_str) {
-    if (isOpen(original_name_str)){ //You only rename the image if it is currently opened. This can avoid some errors
+    if (original_name_str != new_name_str && isOpen(original_name_str)){ //You only rename the image if it is currently opened. This can avoid some errors
         selectImage(original_name_str);
         rename(new_name_str);
         return new_name_str;
     }else{
         print("No window for "+original_name_str+" was found so cannot rename it!");
+        print("Your original_name_str is "+original_name_str);
+        print("Your new_name_str is "+new_name_str);
+        print("If your original_name_str and new_name_str are only different in a string for extension, you can ignore this");
     }
 }
 
@@ -315,12 +318,6 @@ function apply_LUT(input_image_str, LUT_name_str) {
     run("Enhance Contrast", "saturated=0.35"); //Do some auto-contrast
 }
 
-
-
-
-
-
-
 macro "heatmap_generation_and_save [h]" {
     stack_title = get_stack_name();
 
@@ -355,6 +352,53 @@ macro "overlay_heatmap_on_brightfield_and save [o]"{
     format_array = newArray("Tiff", "Jpeg");
     save_images(save_directory, image_name_str, format_array);
     close(heatmap_merge_brightfield_image);
+}
+
+
+
+//Functions for making and saving the montage
+macro "montage_generation_and_save [m]" {
+    //Try to reobtain the stack_name from the heatmap's image name
+    heatmap_image = locate_image_by_regex("^Heatmap.*");
+    heatmap_image_name_array = split(heatmap_image, "of ");
+    stack_name = heatmap_image_name_array[1];
+
+    run("Merge Channels...", "c1="+stack_name+"_405 c2="+stack_name+"_488 c3="+stack_name+"_brightfield c4=[Heatmap of "+stack_name+"] create keep");
+    //Making merge channel image is the only way to have different LUT on different slices of a stack
+
+    //Rename slices
+    //1st slice is the 405 nm image
+    setSlice(1);
+    run("Set Label...", "label=["+stack_name+"_405]");
+
+    //2nd slice is the 488 nm image
+    setSlice(2);
+    run("Set Label...", "label=["+stack_name+"_488]");
+
+    //3rd slice is the brightfield image
+    setSlice(3);
+    run("Set Label...", "label=["+stack_name+"_brightfield]");
+
+    //4th slice is the ratio heatmap
+    setSlice(4);
+    run("Set Label...", "label=["+stack_name+"_heatmap]");
+
+
+
+    Stack.setDisplayMode("color"); //Change the display mode from composite to color so the 1st image of the montage result is correct. This doesn't change the image type
+    run("Make Montage...", "columns=2 rows=2 scale=1 label");
+    //"label" means label the montage using the slice names
+    //The resulting montage will be a RGB image
+
+
+    montage_filename = "Montage of "+stack_name;
+    rename_image("Montage", montage_filename);
+
+    save_directory = "C:\\Users\\louie\\Desktop\\Fiji_output\\";
+    image_name_str = locate_image_by_regex("^Montage.*");
+    format_array = newArray("Tiff", "Jpeg");
+    save_images(save_directory, image_name_str,format_array);
+    close(montage_filename);
 }
 
 
