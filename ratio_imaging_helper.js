@@ -50,7 +50,7 @@ function convert_to_32_bit() { //You have to do this to have float results (32-b
     run("32-bit"); //Convert image type from 16-bit to 32-bit. This applies to all the slices in the stack
 }
 
-function locate_image_by_regex(regex_str){//You should only find 1 unique image from this function
+function locate_image_by_regex(regex_str){//This function only outputs 1 unique image that matches regex_str
     found_match = false;
 
     images = getList("image.titles");
@@ -65,6 +65,25 @@ function locate_image_by_regex(regex_str){//You should only find 1 unique image 
 
     if (found_match) {
         return output_image; //This should be a string for the image's name
+    }else {
+        return "No match imaged found!";
+    }
+}
+
+function locate_images_by_regex(regex_str){//This function return s an array of images that match the regex_str
+    found_images_array = newArray();
+
+    images = getList("image.titles");
+    for (i = 0; i < images.length; i++) { //Iterate through all opened images
+        if (matches(images[i], regex_str)) {
+            found_images_array = append_to_array(found_images_array, images[i]);
+        } else {
+            //Do nothing
+        }
+    }
+
+    if (found_images_array.length > 0) {
+        return found_images_array; //This should be a string for the image's name
     }else {
         return "No match imaged found!";
     }
@@ -403,6 +422,35 @@ macro "montage_generation_and_save [m]" {
 
 
 
+//Functions for finishing things up
+function save_processed_stack(){
+    //Try to reobtain the stack_name from the heatmap's image name
+    heatmap_image = locate_image_by_regex("^Heatmap.*");
+    heatmap_image_name_array = split(heatmap_image, "of ");
+    stack_name = heatmap_image_name_array[1];
 
+    processed_stack_name = "Processed stack of "+stack_name;
+    rename_image("Composite", processed_stack_name);
+
+    save_directory = "C:\\Users\\louie\\Desktop\\Fiji_output\\";
+    format_array = newArray("Tiff"); //The thumbnail will look crappy but if you import the .tif back in ImageJ, you can still edit it as you like
+    save_images(save_directory, processed_stack_name, format_array);
+    close(processed_stack_name);
+}
+
+macro "finish_up [f]"{
+    save_processed_stack();
+
+    heatmap_image = locate_image_by_regex("^Heatmap.*");
+    heatmap_image_name_array = split(heatmap_image, "of ");
+    stack_name = heatmap_image_name_array[1];
+
+    //Close up all remaining windows from processing this stack
+    close_windows_array = locate_images_by_regex("^"+stack_name+".*");
+    close_windows_array = append_to_array(close_windows_array, heatmap_image);
+    for(i = 0; i < close_windows_array.length; i++){
+        close(close_windows_array[i]);
+    }
+}
 
 
