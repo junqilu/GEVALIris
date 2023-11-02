@@ -360,7 +360,7 @@ macro "heatmap_generation_and_save [h]" {
 
 
 //Functions for merging heatmap and bright-field
-macro "overlay_heatmap_on_brightfield_and save [o]"{
+macro "overlay_heatmap_on_brightfield_and_save [o]"{
     heatmap_image = locate_image_by_regex("^Heatmap.*");
     brightfield_image = locate_image_by_regex(".*brightfield$");
 
@@ -445,11 +445,32 @@ macro "finish_up [f]"{
     heatmap_image_name_array = split(heatmap_image, "of ");
     stack_name = heatmap_image_name_array[1];
 
+    //Close up all remaining windows from processing this stack
     close_windows_array = locate_images_by_regex("^"+stack_name+".*");
     close_windows_array = append_to_array(close_windows_array, heatmap_image);
     for(i = 0; i < close_windows_array.length; i++){
         close(close_windows_array[i]);
     }
+}
+
+
+//Functions to auto the whole process together
+macro "auto_everything [z]" {
+    run("display_and_slice_renaming [d]");
+
+    waitForUser("Once you finish adding selection for background with shortcut key [a], click OK");
+
+    run("clean_background [c]");
+
+    run("set_background_to_NaN [x]");
+
+    run("heatmap_generation_and_save [h]");
+
+    run("overlay_heatmap_on_brightfield_and_save [o]");
+
+    run("montage_generation_and_save [m]");
+
+    run("finish_up [f]");
 }
 
 
