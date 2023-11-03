@@ -66,7 +66,7 @@ function locate_image_by_regex(regex_str){//This function only outputs 1 unique 
     if (found_match) {
         return output_image; //This should be a string for the image's name
     }else {
-        return "No match imaged found!";
+        return "No matched image was found!";
     }
 }
 
@@ -164,7 +164,7 @@ function judge_directory_exists(directory_str){
 function judge_make_directory(output_folder_name){ //Check whether output_folder_name is on the desktop and if not, make one on your desktop to store the later outputs from processing
     desktop_directory = obtain_desktop_directory();
 
-    output_folder_directory = desktop_directory + output_folder_name;
+    output_folder_directory = desktop_directory + output_folder_name + "\\"; //"\\" here ensures it's a folder
 
     if (judge_directory_exists(output_folder_directory)){
         //Do nothing
@@ -172,10 +172,12 @@ function judge_make_directory(output_folder_name){ //Check whether output_folder
         File.makeDirectory(output_folder_directory);
     }
 
+    return output_folder_directory;
 }
 
 macro "setup_output_folder [s]"{
     judge_make_directory("Fiji_output"); //Judge whether the desktop has a "Fiji_output" and if not, make that folder
+    //If the folder is already there, nothing will happen
 }
 
 
@@ -398,7 +400,7 @@ macro "heatmap_generation_and_save [h]" {
     apply_LUT(result_image, "mpl-inferno"); //Apply the mpl-inferno style to the heatmap with some contrast adjustment
     rename_image(result_image, "Heatmap of " + stack_title);
 
-    save_directory = "C:\\Users\\louie\\Desktop\\Fiji_output\\";
+    save_directory = judge_make_directory("Fiji_output");
     image_name_str = locate_image_by_regex("^Heatmap.*");
     format_array = newArray("Tiff", "Jpeg");
     save_images(save_directory, image_name_str, format_array);
@@ -414,7 +416,7 @@ macro "overlay_heatmap_on_brightfield_and_save [o]"{
 
     heatmap_merge_brightfield_image = merge_two_images(heatmap_image, brightfield_image);
 
-    save_directory = "C:\\Users\\louie\\Desktop\\Fiji_output\\";
+    save_directory = judge_make_directory("Fiji_output");
     image_name_str = locate_image_by_regex(heatmap_merge_brightfield_image);
     format_array = newArray("Tiff", "Jpeg");
     save_images(save_directory, image_name_str, format_array);
@@ -461,7 +463,7 @@ macro "montage_generation_and_save [m]" {
     montage_filename = "Montage of "+stack_name;
     rename_image("Montage", montage_filename);
 
-    save_directory = "C:\\Users\\louie\\Desktop\\Fiji_output\\";
+    save_directory = judge_make_directory("Fiji_output");
     image_name_str = locate_image_by_regex("^Montage.*");
     format_array = newArray("Tiff", "Jpeg");
     save_images(save_directory, image_name_str,format_array);
@@ -480,7 +482,7 @@ function save_processed_stack(){
     processed_stack_name = "Processed stack of "+stack_name;
     rename_image("Composite", processed_stack_name);
 
-    save_directory = "C:\\Users\\louie\\Desktop\\Fiji_output\\";
+    save_directory = judge_make_directory("Fiji_output");
     format_array = newArray("Tiff"); //The thumbnail will look crappy but if you import the .tif back in ImageJ, you can still edit it as you like
     save_images(save_directory, processed_stack_name, format_array);
     close(processed_stack_name);
@@ -504,6 +506,8 @@ macro "finish_up [f]"{
 
 //Functions to auto the whole process together
 macro "auto_everything [z]" {
+    run("setup_output_folder [s]");
+
     run("display_and_slice_renaming [d]");
 
     waitForUser("Once you finish adding selection for background with shortcut key [a], click OK");

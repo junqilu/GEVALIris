@@ -1,6 +1,5 @@
 //Change the filename extension from .js to .ijm and then it can be installed into ImageJ
 
-//For your ratio imaging of astrocyte-melanoma co-culture, in a stack of images, after the spliting, the image with a window name ending with "0001" is the Ex405, "0002" is the Ex488, and "0003" is the whitefield
 //All functions work in the background and the macros are callable from the outside (by either click on the function or the shortcut key--the key in the [])
 //After each edit, you have to reinstall the macro file into the ImageJ to test them out
 
