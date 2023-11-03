@@ -66,7 +66,7 @@ function locate_image_by_regex(regex_str){//This function only outputs 1 unique 
     if (found_match) {
         return output_image; //This should be a string for the image's name
     }else {
-        return "No match imaged found!";
+        return "No matched image was found!";
     }
 }
 
