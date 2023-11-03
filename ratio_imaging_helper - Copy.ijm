@@ -146,6 +146,41 @@ function merge_two_images (image_name_str_1, image_name_str_2){
 
 
 
+//Functions for file management
+function obtain_desktop_directory(){//Obtain the string for desktop's directory on different computer
+    path = getDirectory("home") + "Desktop\\";
+    return path;
+}
+
+function judge_directory_exists(directory_str){
+    if (File.isDirectory(directory_str)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
+function judge_make_directory(output_folder_name){ //Check whether output_folder_name is on the desktop and if not, make one on your desktop to store the later outputs from processing
+    desktop_directory = obtain_desktop_directory();
+
+    output_folder_directory = desktop_directory + output_folder_name;
+
+    if (judge_directory_exists(output_folder_directory)){
+        //Do nothing
+    } else {
+        File.makeDirectory(output_folder_directory);
+    }
+
+}
+
+macro "setup_output_folder [s]"{
+    judge_make_directory("Fiji_output"); //Judge whether the desktop has a "Fiji_output" and if not, make that folder
+}
+
+
+
+
 
 //Functions for better display and slice renaming
 //These functions are automatic
