@@ -171,6 +171,7 @@ function display_with_auto_contrast() { //Make the stack better displayed (incre
         if (i <= 2) { //Skip the last slice, which is the bright-field
             setSlice(i);
             run("Enhance Contrast", "saturated=0.35"); //One time is enough for you to see
+            //"saturated=0.35" is the default
             run("Apply LUT", "slice"); //Only apply the contrast adjustment to that slice rather than the whole stack
         }
     }
@@ -320,7 +321,7 @@ function stack_to_images() {
     run("Stack to Images"); // Split a stack into images
 }
 
-function image_division(input_image_str_1, input_image_str_2) {
+function image_division_image_calculator(input_image_str_1, input_image_str_2) { //This is the simpler ratio calculation of 2 images
     imageCalculator("Divide create 32-bit", input_image_str_1, input_image_str_2);
     //"Divide" means division
     //"create" means to check the box for "Create new window"
@@ -329,12 +330,21 @@ function image_division(input_image_str_1, input_image_str_2) {
     close("Image Calculator");
 }
 
+function image_division_ratio_plus(input_image_str_1, input_image_str_2){//This is the one demonstrated in the published GEVAL protocol
+    //This function requires you to have Ratio Plus plug in installed first
+
+    run("Ratio Plus", "image1="+input_image_str_1+" image2="+input_image_str_2+" background1=10 clipping_value1=0 background2=0 clipping_value2=0 multiplication=2");
+}
+
 
 function apply_LUT(input_image_str, LUT_name_str) {
     selectImage(input_image_str);
     run(LUT_name_str);
 
-    run("Enhance Contrast", "saturated=0.35"); //Do some auto-contrast
+    run("Enhance Contrast...", "saturated=0.40 normalize"); //Do some auto-contrast. This is different from run("Enhance Contrast", "saturated=0.40");
+    //"saturated" is default to be 0.35% but the GEVAL protocol requires a 0.4% saturation
+    //"normalize" is also required by the GEVAL protocol but this is only on 1 ratio image
+    //If you want to normalize several ratio images together you need to first combine them in a stack, so that the same minimum and maximum are applied to all ratio images uniformly
 }
 
 macro "heatmap_generation_and_save [h]" {
@@ -344,10 +354,13 @@ macro "heatmap_generation_and_save [h]" {
 
     image_1 = locate_image_by_regex(".*405$"); //Image's name ends with 405
     image_2 = locate_image_by_regex(".*488$"); //Image's name ends with 488
-    image_division(image_1, image_2);
 
-    result_image = locate_image_by_regex("^Result.*"); //Image's name starts with "Result"
-    apply_LUT(result_image, "mpl-inferno"); //Apply the mpl-inferno style to the heatmap
+    //Choose which image division function you want to use
+    //image_division_image_calculator(image_1, image_2); //This simply uses image calculator
+    image_division_ratio_plus(image_1, image_2); //This uses the ratio plus plugin
+
+    result_image = locate_image_by_regex("^Ratio.*"); //Image's name starts with "Ratio"
+    apply_LUT(result_image, "mpl-inferno"); //Apply the mpl-inferno style to the heatmap with some contrast adjustment
     rename_image(result_image, "Heatmap of " + stack_title);
 
     save_directory = "C:\\Users\\louie\\Desktop\\Fiji_output\\";

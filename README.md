@@ -1,6 +1,6 @@
 # AstrocyteMelanomaCoCulture
 This directory stores the code for processing the images of astrocyte-melanoma co-culture. 
-* Because ImageJ macro language is very similar to JavaScript, all the codes are in .js format during processing
+* Because ImageJ macro language is very similar to JavaScript, all the codes are in .js format during development in WebStorm
 
 ## Requirements for the input images
 * All input files should be .ims
