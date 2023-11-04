@@ -1,6 +1,5 @@
 //Change the filename extension from .js to .ijm and then it can be installed into ImageJ
 
-//For your ratio imaging of astrocyte-melanoma co-culture, in a stack of images, after the spliting, the image with a window name ending with "0001" is the Ex405, "0002" is the Ex488, and "0003" is the whitefield
 //All functions work in the background and the macros are callable from the outside (by either click on the function or the shortcut key--the key in the [])
 //After each edit, you have to reinstall the macro file into the ImageJ to test them out
 
@@ -30,8 +29,16 @@ function print_array(input_array) { //Iterate through input_array to print out e
 }
 
 function append_to_array(input_array, append_value) { //ImageJ script seems to lack a very basic append to an array function
-    input_array = Array.concat(input_array, append_value);
-    return input_array;
+    // input_array = Array.concat(input_array, append_value); //This doesn't work in some places since JavaScript passes arrays by reference and this line doesn't modify the input_array in place. When you reassign input_array, it creates a new local variable that doesn't affect the original array
+
+    output_array = newArray();
+
+    for (i = 0; i < input_array.length; i++) {
+        output_array[i] = input_array[i]; // Copy existing elements to the new array
+    }
+    output_array[input_array.length] = append_value; // Add the new element to the end
+    return output_array; // Return the new array
+
 }
 
 function average_array_num(input_array_num) { //input_array_num is an array of numbers and this function return the average from those numbers
@@ -523,6 +530,79 @@ macro "auto_everything [z]" {
     run("montage_generation_and_save [m]");
 
     run("finish_up [f]");
+}
+
+
+
+
+//Functions to normalize all the ratio heatmaps
+function pick_a_directory(){
+    path = getDirectory("Choose a Directory"); //This will open the file dialogue
+
+    return path;
+}
+
+function filter_files(input_directory_str, regex_str){
+    file_list = getFileList(input_directory_str);
+    output_file_array = newArray();
+
+    // Loop through the files and open the ones that match the regex pattern
+    for (i = 0; i < file_list.length; i++) {
+        if (matches(file_list[i], regex_str)) {
+            output_file_array = append_to_array(output_file_array, input_directory_str + "\\" +file_list[i]);
+
+        }
+    }
+
+    return output_file_array;
+}
+
+function batch_open_files(file_directories_array){
+    for (i = 0; i < file_directories_array.length; i++) {
+        open(file_directories_array[i]);
+    }
+}
+
+function normalize_heatmaps (){
+    run("Images to Stack", "use"); //Make the stack
+    run("Enhance Contrast...", "saturated=0.4 normalize");
+}
+
+function rename_heatmaps(){
+    rename_image("Stack", "Normalized heatmaps");
+    for (i = 1; i < nSlices + 1; i++) { //Rename slices of the stack
+        setSlice(i);
+        old_slice_name = getInfo("slice.label");
+        new_slice_name = replace(old_slice_name, "Heatmap", "Normalized heatmap");
+        run("Set Label...", "label=["+new_slice_name+"]");
+    }
+}
+
+macro "normalize_and_save_heatmaps [n]" {
+    input_folder_directory = pick_a_directory(); //Ask user to locate the folder that contains all the ratio heatmaps
+
+    heatmap_files_array = filter_files(input_folder_directory, "^Heatmap.*.tif$");
+
+    batch_open_files(heatmap_files_array);
+
+    normalize_heatmaps(); //This normalizes all the heatmaps
+
+    rename_heatmaps();
+
+    save_directory = judge_make_directory("Fiji_output\\normalized heatmaps");
+    normalized_heatmaps_stack_name = "Normalized heatmaps";
+    heatmap_stack_format_array = newArray("Tiff");
+    save_images(save_directory, normalized_heatmaps_stack_name, heatmap_stack_format_array);
+
+    run("Stack to Images");
+
+    normalized_heatmaps = locate_images_by_regex("^Normalized heatmap.*");
+    heatmap_format_array = newArray("Tiff", "Jpeg");
+    for (i = 0; i < normalized_heatmaps.length; i++) { //Save each images into a folder
+        selectImage(normalized_heatmaps[i]); //You must select that image to activate. Otherwise, you'll have the same image saved several times with different file names
+        save_images(save_directory, normalized_heatmaps[i], heatmap_format_array);
+        close(normalized_heatmaps[i]);
+    }
 }
 
 
