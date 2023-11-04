@@ -385,7 +385,7 @@ function apply_LUT(input_image_str, LUT_name_str) {
     selectImage(input_image_str);
     run(LUT_name_str);
 
-    run("Enhance Contrast...", "saturated=0.40 normalize"); //Do some auto-contrast. This is different from run("Enhance Contrast", "saturated=0.40");
+    run("Enhance Contrast...", "saturated=0.40"); //Do some auto-contrast. This is different from run("Enhance Contrast", "saturated=0.40");
     //"saturated" is default to be 0.35% but the GEVAL protocol requires a 0.4% saturation
     //"normalize" is also required by the GEVAL protocol but this is only on 1 ratio image
     //If you want to normalize several ratio images together you need to first combine them in a stack, so that the same minimum and maximum are applied to all ratio images uniformly
