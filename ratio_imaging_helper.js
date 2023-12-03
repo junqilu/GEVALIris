@@ -347,6 +347,8 @@ function set_background_to_NaN_core_by_thresholding() { // Set background pixels
 }
 
 function set_background_to_NaN_core_by_manual(){ // Set background pixels to NaN by manual drawing
+    setTool("freehand"); //Set the selection tool to freehand, which is the most commonly used tool for outline a cell
+
     waitForUser("Manually outline the cell and hit OK");
 
     run("Make Inverse"); //Select the outside of your cells, aka the background pixels
@@ -529,6 +531,7 @@ macro "auto_everything [z]" {
 
     run("display_and_slice_renaming [d]");
 
+    setTool("rectangle"); //Change the selection tool to rectangle which is the most commonly used tool for selecting the background
     waitForUser("Once you finish adding selection for background with shortcut key [a], click OK");
 
     run("clean_background [c]");
