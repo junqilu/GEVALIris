@@ -331,7 +331,7 @@ function median_filter(radius_num) { //Smooth out the fuzziness
     }
 }
 
-function set_background_to_NaN_core() {
+function set_background_to_NaN_core_by_thresholding() { // Set background pixels to NaN by thresholding
     /* setAutoThreshold("Otsu dark no-reset");
     run("NaN Background", "slice"); */
     //The lines above run things very fast without giving you a chance to adjust things manually so I commented them out
@@ -346,11 +346,23 @@ function set_background_to_NaN_core() {
     close("Threshold");
 }
 
+function set_background_to_NaN_core_by_manual(){ // Set background pixels to NaN by manual drawing
+    waitForUser("Manually outline the cell and hit OK");
+
+    run("Make Inverse"); //Select the outside of your cells, aka the background pixels
+
+    run("Set...", "value=NaN slice"); //Set those background pixels as NaN
+
+    run("Select None"); //Unselect everything to avoid confusion in the next step
+}
+
 
 macro "set_background_to_NaN [x]" {
-    convert_to_32_bit(); //Be ready for the later image division. This allows the 32-bit data type, aka float
+    convert_to_32_bit(); //Be ready for the later image division. This allows the 32-bit data type, aka float, and also allows for the NaN data type
     median_filter(2); //Dave likes to use radius = 2 for the median filter
-    set_background_to_NaN_core();
+
+    // set_background_to_NaN_core_by_thresholding(); //This will give you very grainy outline skirts around the cells. But if you don't care about that, you can still use this function
+    set_background_to_NaN_core_by_manual();
 }
 
 
