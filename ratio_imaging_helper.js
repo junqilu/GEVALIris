@@ -553,20 +553,33 @@ macro "montage_generation_and_save [m]" {
     setSlice(2);
     run("Set Label...", "label=["+stack_name+"_488]");
 
-    //3rd slice is the brightfield image
-    setSlice(3);
-    run("Set Label...", "label=["+stack_name+"_brightfield]");
 
-    //4th slice is the ratio heatmap
-    setSlice(4);
-    run("Set Label...", "label=["+stack_name+"_heatmap]");
+    if (nImages > 5){
+        //3rd slice is the brightfield image
+        setSlice(3);
+        run("Set Label...", "label=["+stack_name+"_brightfield]");
 
-
+        //4th slice is the ratio heatmap
+        setSlice(4);
+        run("Set Label...", "label=["+stack_name+"_heatmap]");
+    } else{
+        //4th slice is the ratio heatmap
+        setSlice(3);
+        run("Set Label...", "label=["+stack_name+"_heatmap]");
+    }
 
     Stack.setDisplayMode("color"); //Change the display mode from composite to color so the 1st image of the montage result is correct. This doesn't change the image type
-    run("Make Montage...", "columns=2 rows=2 scale=1 label");
-    //"label" means label the montage using the slice names
-    //The resulting montage will be a RGB image
+
+    if (nSlices > 3){
+        run("Make Montage...", "columns=2 rows=2 scale=1 label");
+        //"label" means label the montage using the slice names
+        //The resulting montage will be a RGB image
+    }else{
+        run("Make Montage...", "columns=3 rows=1 scale=1 label");
+        //"label" means label the montage using the slice names
+        //The resulting montage will be a RGB image
+    }
+
 
 
     montage_filename = "Montage of "+stack_name;
