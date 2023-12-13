@@ -244,6 +244,49 @@ function rename_slices(){
 }
 
 function display_with_auto_contrast() { //Make the stack better displayed (increase contrast for 405 and 488 images) without changing the raw data
+    // The original method (below) doesn't work since the run("Enhance Contrast", "saturated=0.35"); line will still apply to all the images in a stack regardless of your run("Apply LUT", "slice"); line. So brightness and contrast adjustment might be part of the LUT
+    // for (i = 1; i < nSlices + 1; i++) { //Iterate all slices
+    //     //nSlices is the predefined variable that stores the total number of slices in a stack
+    //     if (i <= 2) { //Skip the last slice, which is the bright-field
+    //         setSlice(i);
+    //         run("Enhance Contrast", "saturated=0.35"); //One time is enough for you to see
+    //         //"saturated=0.35" is the default
+    //         run("Apply LUT", "slice"); //Only apply the contrast adjustment to that slice rather than the whole stack
+    //     }
+    // }
+
+    // New method--unstack the images, use locate_image_by_regex to locate the image, adjust the brightness and contrast, and then restack them up. Later I found out that you cannot do this since after the restacking, the images will have the same brightness and contrast setting
+    // brightfield_img_avaialble = false;
+    // if (nSlices > 2){
+    //     brightfield_img_avaialble = true;
+    // }
+    //
+    // run("Stack to Images"); //Unstack the slices
+    //
+    // img_405_name = locate_image_by_regex(".*405$");
+    // img_488_name = locate_image_by_regex(".*488$");
+    // img_name_array = newArray(img_405_name, img_488_name);
+    //
+    // for (i = 0; i < lengthOf(img_name_array); i++) {
+    //     // Access the current string
+    //     current_img_name = img_name_array[i];
+    //     selectImage(current_img_name);
+    //
+    //     run("Enhance Contrast", "saturated=0.35"); //One time is enough for you to see
+    //     // "saturated=0.35" is the default
+    // }
+    //
+    // if (brightfield_img_avaialble == true){ //If you have the brightfield image, then you also adjust the brightness and contrast on that. This depends on how bad your brightfield image is but separating it from the rest of the images makes it easier to manipulate if needed
+    //     brightfield_img_name = locate_image_by_regex(".*brightfield$");
+    //     selectImage(brightfield_img_name);
+    //
+    //     run("Enhance Contrast", "saturated=0.35"); //One time is enough for you to see
+    //     // "saturated=0.35" is the default
+    // }
+    //
+    // run("Images to Stack", "use"); //Restack the images up
+
+    //Just stick to the original adjustment as a primary step for you to see the images and then later once the stack is unstacked, you can adjust the brightfield image again
     for (i = 1; i < nSlices + 1; i++) { //Iterate all slices
         //nSlices is the predefined variable that stores the total number of slices in a stack
         if (i <= 2) { //Skip the last slice, which is the bright-field
