@@ -13,6 +13,21 @@
 
 //Basic functions
 //This section contains basic functions that will be used in other functions
+function concatenate_array_by_character(input_array, input_character){
+    resultString = ""; // Initialize an empty string to hold the concatenated result
+
+
+    for (i = 0; i < lengthOf(input_array); i++) { // Loop through input_array and concatenate elements with input_character
+        resultString += input_array[i];
+
+        if (i < lengthOf(input_array) - 1) { // Add separator except for the last element
+            resultString += input_character;
+        }
+    }
+
+    return resultString;
+}
+
 function get_stack_name(){ //Obtain the stack name from the current window
     //This may not be reliable when you have multiple windows since it seems like to just get the title from the current activated window
     stack_title = getTitle();
