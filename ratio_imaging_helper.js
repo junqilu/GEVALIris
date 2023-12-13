@@ -237,8 +237,10 @@ function rename_slices(){
     run("Set Label...", "label=["+filename+"_488]");
 
     //3rd slice is the brightfield image
-    setSlice(3);
-    run("Set Label...", "label=["+filename+"_brightfield]");
+    if (nSlices > 2 ) { //This means you have a brightfield image in the stack
+        setSlice(3);
+        run("Set Label...", "label=["+filename+"_brightfield]");
+    }
 }
 
 function display_with_auto_contrast() { //Make the stack better displayed (increase contrast for 405 and 488 images) without changing the raw data
