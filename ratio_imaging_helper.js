@@ -49,6 +49,7 @@ function get_stack_name(){ //Obtain the stack name from the current window
 }
 
 function print_array(input_array) { //Iterate through input_array to print out each value. This is for debugging
+    //Later I learned that you can use Array.print(input_array); for this purpose
     for (i = 0; i < input_array.length; i++) {
         print(input_array[i]);
     }
