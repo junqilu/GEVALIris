@@ -146,7 +146,10 @@ function save_image (save_directory,image_name_str, format_str){
     }
 
     saveAs(format_str, save_directory+image_name_str+file_extension);
-    rename_image(image_name_str+file_extension, image_name_str); //Rename the image back to get rid of the file extension part. This makes the referencing easier in later steps
+
+    if (file_extension != ".jpg"){ //Only rename if file_extension is not ".jpg". This is because when you save an image as .jpg, it doesn't change the image window title. This inconsistency is very annoying and this special handling might cause some troubles in the future if the programmers of ImageJ fix this inconsistency
+        rename_image(image_name_str+file_extension, image_name_str); //Rename the image back to get rid of the file extension part. This makes the referencing easier in later steps
+    }
 }
 
 function save_images(save_directory,image_name_str, format_array){
