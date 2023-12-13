@@ -204,7 +204,9 @@ function judge_make_directory(output_folder_name){ //Check whether output_folder
     output_folder_directory = desktop_directory + output_folder_name + "\\"; //"\\" here ensures it's a folder
 
     if (judge_directory_exists(output_folder_directory)){
-        //Do nothing
+        //Lines below are commented out because they are part of the auto_everything function and I don't want to see the message box every time I process an image
+        // Dialog.create("Output folder has been created!");
+        // Dialog.addMessage("Output folder has already been created at directory: "+output_folder_directory);
     } else {
         File.makeDirectory(output_folder_directory);
     }
