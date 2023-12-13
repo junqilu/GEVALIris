@@ -533,11 +533,16 @@ macro "overlay_heatmap_on_brightfield_and_save [o]"{
 macro "montage_generation_and_save [m]" {
     //Try to reobtain the stack_name from the heatmap's image name
     heatmap_image = locate_image_by_regex("^Heatmap.*");
-    heatmap_image_name_array = split(heatmap_image, "of ");
-    stack_name = heatmap_image_name_array[1];
 
-    run("Merge Channels...", "c1="+stack_name+"_405 c2="+stack_name+"_488 c3="+stack_name+"_brightfield c4=[Heatmap of "+stack_name+"] create keep");
-    //Making merge channel image is the only way to have different LUT on different slices of a stack
+    stack_name = substring(heatmap_image, 11, lengthOf(heatmap_image)); //Remove the "Heatmap of " from beginning to get the stack_name
+
+    if (nImages > 3){
+        run("Merge Channels...", "c1=["+stack_name+"_405] c2=["+stack_name+"_488] c3=["+stack_name+"_brightfield] c4=[Heatmap of "+stack_name+"] create keep");
+        //Making merge channel image is the only way to have different LUT on different slices of a stack
+    } else{
+        run("Merge Channels...", "c1=["+stack_name+"_405] c2=["+stack_name+"_488] c3=[Heatmap of "+stack_name+"] create keep");
+    }
+
 
     //Rename slices
     //1st slice is the 405 nm image
