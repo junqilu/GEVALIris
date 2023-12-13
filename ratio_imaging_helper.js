@@ -497,6 +497,8 @@ macro "heatmap_generation_and_save [h]" {
 
     result_image = locate_image_by_regex("^Ratio.*"); //Image's name starts with "Ratio"
     apply_LUT(result_image, "mpl-inferno"); //Apply the mpl-inferno style to the heatmap with some contrast adjustment
+
+    // print(stack_title); // For debugging
     rename_image(result_image, "Heatmap of " + stack_title);
 
     save_directory = judge_make_directory("Fiji_output");
