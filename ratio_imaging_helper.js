@@ -513,13 +513,18 @@ macro "overlay_heatmap_on_brightfield_and_save [o]"{
     heatmap_image = locate_image_by_regex("^Heatmap.*");
     brightfield_image = locate_image_by_regex(".*brightfield$");
 
-    heatmap_merge_brightfield_image = merge_two_images(heatmap_image, brightfield_image);
+    if (brightfield_image != "No matched image was found!"){
+        selectImage(brightfield_image);
+        run("Enhance Contrast", "saturated=0.35"); //Now that brightfield is separated from the rest of the images, you can do this adjustment on it
 
-    save_directory = judge_make_directory("Fiji_output");
-    image_name_str = locate_image_by_regex(heatmap_merge_brightfield_image);
-    format_array = newArray("Tiff", "Jpeg");
-    save_images(save_directory, image_name_str, format_array);
-    close(heatmap_merge_brightfield_image);
+        heatmap_merge_brightfield_image = merge_two_images(heatmap_image, brightfield_image);
+
+        save_directory = judge_make_directory("Fiji_output");
+        image_name_str = locate_image_by_regex(heatmap_merge_brightfield_image);
+        format_array = newArray("Tiff", "Jpeg");
+        save_images(save_directory, image_name_str, format_array);
+        close(heatmap_merge_brightfield_image);
+    }
 }
 
 
