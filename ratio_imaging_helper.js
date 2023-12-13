@@ -509,6 +509,46 @@ macro "heatmap_generation_and_save [h]" {
 
 
 
+// Below are additional functions to generate histogram and data for quantification check and comparison
+function histogram_data_generation_and_save(bins_num){ //This should be equivalent to you click on the ratio heatmap, click Analyze -> Histogram -> List, and save the pop out result data table locally
+
+    getHistogram(values, counts, bins_num); //Here a stack histogram with bins_num
+    // values and counts are the things that you'll be using below to output the .csv
+
+    //Table creation and saving
+    Table.create("histogram_data");
+    Table.setColumn("bin_start", values); //Column with histogram values. I use "bin_start" to be the same as if you use the GUI to output the data
+    Table.setColumn("count", counts); //Column with histogram counts. I use "count" to be the same as if you use the GUI to output the data
+
+    save_directory = judge_make_directory("Fiji_output");
+    heatmap_image = locate_image_by_regex("^Heatmap.*");
+    stack_name = substring(heatmap_image, 11, lengthOf(heatmap_image)); //Remove the "Heatmap of " from beginning to get the stack_name
+    FileName = "histogram_data_for_"+stack_name+ ".csv";
+    saveAs("Results", save_directory + "\\"+ FileName);
+
+    close(FileName); //Close the window for the histogram data
+}
+
+function histogram_image_generation_and_save(bins_num){
+    run("Histogram", "bins="+bins_num+" use x_min=0 x_max=1 y_max=Auto"); //Generate the histogram from the GUI
+    // "x_min=0 x_max=1" because this is the ratio heatmap and all the ratios are between 0 and 1
+
+    save_directory = judge_make_directory("Fiji_output");
+    heatmap_image = locate_image_by_regex("^Heatmap.*");
+    stack_name = substring(heatmap_image, 11, lengthOf(heatmap_image)); //Remove the "Heatmap of " from beginning to get the stack_name
+    FileName = "histogram_image_for_"+stack_name+ ".tif";
+    saveAs("Tiff", save_directory + "\\"+ FileName);
+
+    close(FileName); //Close the window for the histogram GUI
+}
+
+macro "histogram_data_and_image_save"{
+    bins_num = 256; // bins_num is default to be 256 (16 × 16) and I like this number. It's basically the number of columns in your histogram
+    histogram_data_generation_and_save(bins_num);
+
+    histogram_image_generation_and_save(bins_num);
+}
+
 
 //Functions for merging heatmap and bright-field
 macro "overlay_heatmap_on_brightfield_and_save [o]"{
@@ -642,6 +682,8 @@ macro "auto_everything [z]" {
 
     run("heatmap_generation_and_save [h]");
 
+    run("histogram_data_and_image_save");
+
     if (nImages > 3) { //Only overlay the heatmap on brightfield when you have the brightfield (nImages = 4 in this case)
         run("overlay_heatmap_on_brightfield_and_save [o]");
     }
@@ -723,5 +765,10 @@ macro "normalize_and_save_heatmaps [n]" {
         close(normalized_heatmaps[i]);
     }
 }
+
+
+
+
+
 
 
