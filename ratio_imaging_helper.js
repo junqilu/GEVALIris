@@ -32,8 +32,19 @@ function get_stack_name(){ //Obtain the stack name from the current window
     //This may not be reliable when you have multiple windows since it seems like to just get the title from the current activated window
     stack_title = getTitle();
     stack_name_array = split(stack_title, "."); //file_name is an array
-    stack_name = stack_name_array[0];
 
+    if (stack_name_array.length == 1){ //My image names won't have "." in the middle so the first item of stack_name_array is always the image name itself
+        stack_name = stack_name_array[0];
+    } else if (stack_name_array.length > 1){
+        stack_name_array = Array.slice(stack_name_array, 0, stack_name_array.length-1); //Remove the last item of stack_name_array, which is usually the extension name
+        // Array.print(stack_name_array); //For debugging
+
+        stack_name = concatenate_array_by_character(stack_name_array, "."); //Other people's image names can have "." in the middle, so this is a way to restore those middle "."
+    }else{
+        //Do nothing
+    }
+
+    // print("Stack name is "+stack_name); //For debugging
     return stack_name;
 }
 
