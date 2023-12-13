@@ -640,7 +640,9 @@ macro "auto_everything [z]" {
 
     run("heatmap_generation_and_save [h]");
 
-    run("overlay_heatmap_on_brightfield_and_save [o]");
+    if (nImages > 3) { //Only overlay the heatmap on brightfield when you have the brightfield (nImages = 4 in this case)
+        run("overlay_heatmap_on_brightfield_and_save [o]");
+    }
 
     run("montage_generation_and_save [m]");
 
