@@ -13,16 +13,43 @@
 
 //Basic functions
 //This section contains basic functions that will be used in other functions
+function concatenate_array_by_character(input_array, input_character){
+    resultString = ""; // Initialize an empty string to hold the concatenated result
+
+
+    for (i = 0; i < lengthOf(input_array); i++) { // Loop through input_array and concatenate elements with input_character
+        resultString += input_array[i];
+
+        if (i < lengthOf(input_array) - 1) { // Add separator except for the last element
+            resultString += input_character;
+        }
+    }
+
+    return resultString;
+}
+
 function get_stack_name(){ //Obtain the stack name from the current window
     //This may not be reliable when you have multiple windows since it seems like to just get the title from the current activated window
     stack_title = getTitle();
     stack_name_array = split(stack_title, "."); //file_name is an array
-    stack_name = stack_name_array[0];
 
+    if (stack_name_array.length == 1){ //My image names won't have "." in the middle so the first item of stack_name_array is always the image name itself
+        stack_name = stack_name_array[0];
+    } else if (stack_name_array.length > 1){
+        stack_name_array = Array.slice(stack_name_array, 0, stack_name_array.length-1); //Remove the last item of stack_name_array, which is usually the extension name
+        // Array.print(stack_name_array); //For debugging
+
+        stack_name = concatenate_array_by_character(stack_name_array, "."); //Other people's image names can have "." in the middle, so this is a way to restore those middle "."
+    }else{
+        //Do nothing
+    }
+
+    // print("Stack name is "+stack_name); //For debugging
     return stack_name;
 }
 
 function print_array(input_array) { //Iterate through input_array to print out each value. This is for debugging
+    //Later I learned that you can use Array.print(input_array); for this purpose
     for (i = 0; i < input_array.length; i++) {
         print(input_array[i]);
     }
@@ -119,7 +146,10 @@ function save_image (save_directory,image_name_str, format_str){
     }
 
     saveAs(format_str, save_directory+image_name_str+file_extension);
-    rename_image(image_name_str+file_extension, image_name_str); //Rename the image back to get rid of the file extension part. This makes the referencing easier in later steps
+
+    if (file_extension != ".jpg"){ //Only rename if file_extension is not ".jpg". This is because when you save an image as .jpg, it doesn't change the image window title. This inconsistency is very annoying and this special handling might cause some troubles in the future if the programmers of ImageJ fix this inconsistency
+        rename_image(image_name_str+file_extension, image_name_str); //Rename the image back to get rid of the file extension part. This makes the referencing easier in later steps
+    }
 }
 
 function save_images(save_directory,image_name_str, format_array){
@@ -174,7 +204,9 @@ function judge_make_directory(output_folder_name){ //Check whether output_folder
     output_folder_directory = desktop_directory + output_folder_name + "\\"; //"\\" here ensures it's a folder
 
     if (judge_directory_exists(output_folder_directory)){
-        //Do nothing
+        //Lines below are commented out because they are part of the auto_everything function and I don't want to see the message box every time I process an image
+        // Dialog.create("Output folder has been created!");
+        // Dialog.addMessage("Output folder has already been created at directory: "+output_folder_directory);
     } else {
         File.makeDirectory(output_folder_directory);
     }
@@ -205,11 +237,56 @@ function rename_slices(){
     run("Set Label...", "label=["+filename+"_488]");
 
     //3rd slice is the brightfield image
-    setSlice(3);
-    run("Set Label...", "label=["+filename+"_brightfield]");
+    if (nSlices > 2 ) { //This means you have a brightfield image in the stack
+        setSlice(3);
+        run("Set Label...", "label=["+filename+"_brightfield]");
+    }
 }
 
 function display_with_auto_contrast() { //Make the stack better displayed (increase contrast for 405 and 488 images) without changing the raw data
+    // The original method (below) doesn't work since the run("Enhance Contrast", "saturated=0.35"); line will still apply to all the images in a stack regardless of your run("Apply LUT", "slice"); line. So brightness and contrast adjustment might be part of the LUT
+    // for (i = 1; i < nSlices + 1; i++) { //Iterate all slices
+    //     //nSlices is the predefined variable that stores the total number of slices in a stack
+    //     if (i <= 2) { //Skip the last slice, which is the bright-field
+    //         setSlice(i);
+    //         run("Enhance Contrast", "saturated=0.35"); //One time is enough for you to see
+    //         //"saturated=0.35" is the default
+    //         run("Apply LUT", "slice"); //Only apply the contrast adjustment to that slice rather than the whole stack
+    //     }
+    // }
+
+    // New method--unstack the images, use locate_image_by_regex to locate the image, adjust the brightness and contrast, and then restack them up. Later I found out that you cannot do this since after the restacking, the images will have the same brightness and contrast setting
+    // brightfield_img_avaialble = false;
+    // if (nSlices > 2){
+    //     brightfield_img_avaialble = true;
+    // }
+    //
+    // run("Stack to Images"); //Unstack the slices
+    //
+    // img_405_name = locate_image_by_regex(".*405$");
+    // img_488_name = locate_image_by_regex(".*488$");
+    // img_name_array = newArray(img_405_name, img_488_name);
+    //
+    // for (i = 0; i < lengthOf(img_name_array); i++) {
+    //     // Access the current string
+    //     current_img_name = img_name_array[i];
+    //     selectImage(current_img_name);
+    //
+    //     run("Enhance Contrast", "saturated=0.35"); //One time is enough for you to see
+    //     // "saturated=0.35" is the default
+    // }
+    //
+    // if (brightfield_img_avaialble == true){ //If you have the brightfield image, then you also adjust the brightness and contrast on that. This depends on how bad your brightfield image is but separating it from the rest of the images makes it easier to manipulate if needed
+    //     brightfield_img_name = locate_image_by_regex(".*brightfield$");
+    //     selectImage(brightfield_img_name);
+    //
+    //     run("Enhance Contrast", "saturated=0.35"); //One time is enough for you to see
+    //     // "saturated=0.35" is the default
+    // }
+    //
+    // run("Images to Stack", "use"); //Restack the images up
+
+    //Just stick to the original adjustment as a primary step for you to see the images and then later once the stack is unstacked, you can adjust the brightfield image again
     for (i = 1; i < nSlices + 1; i++) { //Iterate all slices
         //nSlices is the predefined variable that stores the total number of slices in a stack
         if (i <= 2) { //Skip the last slice, which is the bright-field
@@ -391,7 +468,8 @@ function image_division_image_calculator(input_image_str_1, input_image_str_2) {
 function image_division_ratio_plus(input_image_str_1, input_image_str_2){//This is the one demonstrated in the published GEVAL protocol
     //This function requires you to have Ratio Plus plug in installed first
 
-    run("Ratio Plus", "image1="+input_image_str_1+" image2="+input_image_str_2+" background1=10 clipping_value1=0 background2=0 clipping_value2=0 multiplication=2");
+    run("Ratio Plus", "image1=["+input_image_str_1+"] image2=["+input_image_str_2+"] background1=10 clipping_value1=0 background2=0 clipping_value2=0 multiplication=2"); //The multiplication = 2 is mentioned in the paper
+    //The additional "[" and "]" is to handle special characters in the input_image_str_1 and input_image_str_2
 }
 
 
@@ -435,13 +513,18 @@ macro "overlay_heatmap_on_brightfield_and_save [o]"{
     heatmap_image = locate_image_by_regex("^Heatmap.*");
     brightfield_image = locate_image_by_regex(".*brightfield$");
 
-    heatmap_merge_brightfield_image = merge_two_images(heatmap_image, brightfield_image);
+    if (brightfield_image != "No matched image was found!"){
+        selectImage(brightfield_image);
+        run("Enhance Contrast", "saturated=0.35"); //Now that brightfield is separated from the rest of the images, you can do this adjustment on it
 
-    save_directory = judge_make_directory("Fiji_output");
-    image_name_str = locate_image_by_regex(heatmap_merge_brightfield_image);
-    format_array = newArray("Tiff", "Jpeg");
-    save_images(save_directory, image_name_str, format_array);
-    close(heatmap_merge_brightfield_image);
+        heatmap_merge_brightfield_image = merge_two_images(heatmap_image, brightfield_image);
+
+        save_directory = judge_make_directory("Fiji_output");
+        image_name_str = locate_image_by_regex(heatmap_merge_brightfield_image);
+        format_array = newArray("Tiff", "Jpeg");
+        save_images(save_directory, image_name_str, format_array);
+        close(heatmap_merge_brightfield_image);
+    }
 }
 
 
@@ -450,11 +533,16 @@ macro "overlay_heatmap_on_brightfield_and_save [o]"{
 macro "montage_generation_and_save [m]" {
     //Try to reobtain the stack_name from the heatmap's image name
     heatmap_image = locate_image_by_regex("^Heatmap.*");
-    heatmap_image_name_array = split(heatmap_image, "of ");
-    stack_name = heatmap_image_name_array[1];
 
-    run("Merge Channels...", "c1="+stack_name+"_405 c2="+stack_name+"_488 c3="+stack_name+"_brightfield c4=[Heatmap of "+stack_name+"] create keep");
-    //Making merge channel image is the only way to have different LUT on different slices of a stack
+    stack_name = substring(heatmap_image, 11, lengthOf(heatmap_image)); //Remove the "Heatmap of " from beginning to get the stack_name
+
+    if (nImages > 3){
+        run("Merge Channels...", "c1=["+stack_name+"_405] c2=["+stack_name+"_488] c3=["+stack_name+"_brightfield] c4=[Heatmap of "+stack_name+"] create keep");
+        //Making merge channel image is the only way to have different LUT on different slices of a stack
+    } else{
+        run("Merge Channels...", "c1=["+stack_name+"_405] c2=["+stack_name+"_488] c3=[Heatmap of "+stack_name+"] create keep");
+    }
+
 
     //Rename slices
     //1st slice is the 405 nm image
@@ -465,20 +553,33 @@ macro "montage_generation_and_save [m]" {
     setSlice(2);
     run("Set Label...", "label=["+stack_name+"_488]");
 
-    //3rd slice is the brightfield image
-    setSlice(3);
-    run("Set Label...", "label=["+stack_name+"_brightfield]");
 
-    //4th slice is the ratio heatmap
-    setSlice(4);
-    run("Set Label...", "label=["+stack_name+"_heatmap]");
+    if (nImages > 5){
+        //3rd slice is the brightfield image
+        setSlice(3);
+        run("Set Label...", "label=["+stack_name+"_brightfield]");
 
-
+        //4th slice is the ratio heatmap
+        setSlice(4);
+        run("Set Label...", "label=["+stack_name+"_heatmap]");
+    } else{
+        //4th slice is the ratio heatmap
+        setSlice(3);
+        run("Set Label...", "label=["+stack_name+"_heatmap]");
+    }
 
     Stack.setDisplayMode("color"); //Change the display mode from composite to color so the 1st image of the montage result is correct. This doesn't change the image type
-    run("Make Montage...", "columns=2 rows=2 scale=1 label");
-    //"label" means label the montage using the slice names
-    //The resulting montage will be a RGB image
+
+    if (nSlices > 3){
+        run("Make Montage...", "columns=2 rows=2 scale=1 label");
+        //"label" means label the montage using the slice names
+        //The resulting montage will be a RGB image
+    }else{
+        run("Make Montage...", "columns=3 rows=1 scale=1 label");
+        //"label" means label the montage using the slice names
+        //The resulting montage will be a RGB image
+    }
+
 
 
     montage_filename = "Montage of "+stack_name;
@@ -497,8 +598,7 @@ macro "montage_generation_and_save [m]" {
 function save_processed_stack(){
     //Try to reobtain the stack_name from the heatmap's image name
     heatmap_image = locate_image_by_regex("^Heatmap.*");
-    heatmap_image_name_array = split(heatmap_image, "of ");
-    stack_name = heatmap_image_name_array[1];
+    stack_name = substring(heatmap_image, 11, lengthOf(heatmap_image)); //Remove the "Heatmap of " from beginning to get the stack_name
 
     processed_stack_name = "Processed stack of "+stack_name;
     rename_image("Composite", processed_stack_name);
@@ -540,7 +640,9 @@ macro "auto_everything [z]" {
 
     run("heatmap_generation_and_save [h]");
 
-    run("overlay_heatmap_on_brightfield_and_save [o]");
+    if (nImages > 3) { //Only overlay the heatmap on brightfield when you have the brightfield (nImages = 4 in this case)
+        run("overlay_heatmap_on_brightfield_and_save [o]");
+    }
 
     run("montage_generation_and_save [m]");
 
