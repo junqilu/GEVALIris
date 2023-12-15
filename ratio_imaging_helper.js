@@ -468,7 +468,7 @@ function image_division_image_calculator(input_image_str_1, input_image_str_2) {
 function image_division_ratio_plus(input_image_str_1, input_image_str_2){//This is the one demonstrated in the published GEVAL protocol
     //This function requires you to have Ratio Plus plug in installed first
 
-    run("Ratio Plus", "image1=["+input_image_str_1+"] image2=["+input_image_str_2+"] background1=10 clipping_value1=0 background2=0 clipping_value2=0 multiplication=2"); //The multiplication = 2 is mentioned in the paper
+    run("Ratio Plus", "image1=["+input_image_str_1+"] image2=["+input_image_str_2+"] background1=0 clipping_value1=0 background2=0 clipping_value2=0 multiplication=1"); //The multiplication = 2 is mentioned in the paper
     //The additional "[" and "]" is to handle special characters in the input_image_str_1 and input_image_str_2
 }
 
@@ -496,7 +496,7 @@ macro "heatmap_generation_and_save [h]" {
     image_division_ratio_plus(image_1, image_2); //This uses the ratio plus plugin
 
     result_image = locate_image_by_regex("^Ratio.*"); //Image's name starts with "Ratio"
-    apply_LUT(result_image, "mpl-inferno"); //Apply the mpl-inferno style to the heatmap with some contrast adjustment
+    apply_LUT(result_image, "16 colors"); //Apply the mpl-inferno style to the heatmap with some contrast adjustment
 
     // print(stack_title); // For debugging
     rename_image(result_image, "Heatmap of " + stack_title);
