@@ -293,7 +293,8 @@ function display_with_auto_contrast() { //Make the stack better displayed (incre
             setSlice(i);
             run("Enhance Contrast", "saturated=0.35"); //One time is enough for you to see
             //"saturated=0.35" is the default
-            run("Apply LUT", "slice"); //Only apply the contrast adjustment to that slice rather than the whole stack
+
+            // run("Apply LUT", "slice"); //Only apply the contrast adjustment to that slice rather than the whole stack. I commented this out since later I found out that clicking on the Apply will change the raw data on the image
         }
     }
 }
