@@ -391,8 +391,8 @@ macro "clean_background [c]" {
     force_close_roi_manager();
 
     //The Results table and the Log are for debugging. Normally I don't need to see them since after the background subtraction, I can tell it's successful by seeing lots of 0-value pixels in the background
-    close("Results");
-    close("Log");
+    // close("Results");
+    // close("Log");
 }
 
 
