@@ -485,7 +485,7 @@ function set_background_to_NaN_core_by_thresholding() { // Set background pixels
     run("Threshold..."); //This gives you a way to adjust the thresholding
 
     //Adjust the threshold
-    waitForUser("Adjust the threshold and hit OK"); //Hitting OK will make the run the next line, which is to make the non-selected part as NaN automatically
+    waitForUser("Ensure your threshold method is Otsu.\nAdjust the threshold and hit OK"); //Hitting OK will make the run the next line, which is to make the non-selected part as NaN automatically
     //The threshold window will also have an Apply button. Don't hit on that
 
     run("NaN Background", "slice");
