@@ -502,7 +502,7 @@ macro "heatmap_generation_and_save [h]" {
     // print(stack_title); // For debugging
     rename_image(result_image, "Heatmap of " + stack_title);
 
-    save_directory = judge_make_directory("Fiji_output");
+    save_directory = judge_make_directory("Fiji_output\\Heatmap_images");
     image_name_str = locate_image_by_regex("^Heatmap.*");
     format_array = newArray("Tiff", "Jpeg");
     save_images(save_directory, image_name_str, format_array);
@@ -521,7 +521,7 @@ function histogram_data_generation_and_save(bins_num, input_stack_name){ //This 
     Table.setColumn("bin_start", values); //Column with histogram values. I use "bin_start" to be the same as if you use the GUI to output the data
     Table.setColumn("count", counts); //Column with histogram counts. I use "count" to be the same as if you use the GUI to output the data
 
-    save_directory = judge_make_directory("Fiji_output");
+    save_directory = judge_make_directory("Fiji_output\\Histogram_data");
     if (input_stack_name == "individual img"){
         heatmap_image = locate_image_by_regex("^Heatmap.*");
         stack_name = substring(heatmap_image, 11, lengthOf(heatmap_image)); //Remove the "Heatmap of " from beginning to get the stack_name
@@ -539,7 +539,7 @@ function histogram_image_generation_and_save(bins_num, input_stack_name){
     run("Histogram", "bins="+bins_num+" use x_min=0 x_max=1 y_max=Auto"); //Generate the histogram from the GUI
     // "x_min=0 x_max=1" because this is the ratio heatmap and all the ratios are between 0 and 1
 
-    save_directory = judge_make_directory("Fiji_output");
+    save_directory = judge_make_directory("Fiji_output\\Histogram_images");
     if (input_stack_name=="individual img"){
         heatmap_image = locate_image_by_regex("^Heatmap.*");
         stack_name = substring(heatmap_image, 11, lengthOf(heatmap_image)); //Remove the "Heatmap of " from beginning to get the stack_name
@@ -572,7 +572,7 @@ macro "overlay_heatmap_on_brightfield_and_save [o]"{
 
         heatmap_merge_brightfield_image = merge_two_images(heatmap_image, brightfield_image);
 
-        save_directory = judge_make_directory("Fiji_output");
+        save_directory = judge_make_directory("Fiji_output\\Heatmap_overlay_brightfield");
         image_name_str = locate_image_by_regex(heatmap_merge_brightfield_image);
         format_array = newArray("Tiff", "Jpeg");
         save_images(save_directory, image_name_str, format_array);
@@ -638,7 +638,7 @@ macro "montage_generation_and_save [m]" {
     montage_filename = "Montage of "+stack_name;
     rename_image("Montage", montage_filename);
 
-    save_directory = judge_make_directory("Fiji_output");
+    save_directory = judge_make_directory("Fiji_output\\Montage_images");
     image_name_str = locate_image_by_regex("^Montage.*");
     format_array = newArray("Tiff", "Jpeg");
     save_images(save_directory, image_name_str,format_array);
@@ -656,7 +656,7 @@ function save_processed_stack(){
     processed_stack_name = "Processed stack of "+stack_name;
     rename_image("Composite", processed_stack_name);
 
-    save_directory = judge_make_directory("Fiji_output");
+    save_directory = judge_make_directory("Fiji_output\\Processed_stacks");
     format_array = newArray("Tiff"); //The thumbnail will look crappy but if you import the .tif back in ImageJ, you can still edit it as you like
     save_images(save_directory, processed_stack_name, format_array);
     close(processed_stack_name);
