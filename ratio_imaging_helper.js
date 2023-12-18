@@ -181,6 +181,44 @@ function merge_two_images (image_name_str_1, image_name_str_2){
     return new_image_name; //By returning rename_image, I can relocate the image I want really easily
 }
 
+function judge_file_exist(file_directory){ //Judge whether file_directory exists
+    fileExists = File.exists(file_directory);
+
+    // Print the result
+    if (fileExists) {
+        return true;
+    } else {
+        return false
+    }
+}
+
+function create_text_file(file_directory){
+    run("Text Window...", "name=mode width=0 height=0");
+    saveAs("Text", file_directory);
+
+    do {
+        wait(10);
+    } while(!File.exists(file_directory)); //Ensure the text file is successfully created
+
+    run("Close");
+}
+
+function read_text_file_as_string(text_file_directory){
+    if (judge_file_exist(text_file_directory)==true){
+        file_strings=File.openAsString(text_file_directory);
+
+        // I have to do the 2 lines below since when writing the mode text file using the print function, the file will have an additional new line character that I need to get rid of for the comparison later
+        file_strings_array = split(file_strings, "\n");
+        file_string = file_strings_array[0];
+    } else{
+        file_string="Input .txt file doesn't exist!";
+    }
+
+    return file_string;
+}
+
+
+
 
 
 //Functions for file management
@@ -217,6 +255,36 @@ function judge_make_directory(output_folder_name){ //Check whether output_folder
 macro "setup_output_folder [s]"{
     judge_make_directory("Fiji_output"); //Judge whether the desktop has a "Fiji_output" and if not, make that folder
     //If the folder is already there, nothing will happen
+}
+
+
+
+// Functions for setting up the tracing mode
+function get_user_mode_choice(){
+    Dialog.create("Select a mode for outlining the cell");
+    Dialog.addRadioButtonGroup("Choose one:", newArray("Threshold", "Manual"), 1, 2, "Manual");
+
+    Dialog.show(); // Show the dialog box
+
+    return Dialog.getRadioButton(); // Check the result of the dialog
+}
+macro "judge_create_mode_file"{
+    save_directory = judge_make_directory("Fiji_output");
+    mode_file_directory = save_directory + "\\mode.txt";
+
+    mode_file_judge = judge_file_exist(mode_file_directory);
+    if (mode_file_judge == true){ //You already have the mode file, so this is not your first time to run the script and thus nothing happen here
+        // Do nothing
+    }else { //This is your 1st time to run the script so set up a mode file
+        create_text_file(mode_file_directory); //Creat the mode.txt within Fiji_output
+
+        mode_option = get_user_mode_choice();
+        print(mode_option);
+
+        mode_file = File.open(mode_file_directory);
+        print(mode_file);
+        print(mode_file, mode_option); //Write mode_option into mode_file. You can do this because print() is basically an output function
+    }
 }
 
 
@@ -441,8 +509,17 @@ macro "set_background_to_NaN [x]" {
     convert_to_32_bit(); //Be ready for the later image division. This allows the 32-bit data type, aka float, and also allows for the NaN data type
     median_filter(2); //Dave likes to use radius = 2 for the median filter
 
-    // set_background_to_NaN_core_by_thresholding(); //This will give you very grainy outline skirts around the cells. But if you don't care about that, you can still use this function
-    set_background_to_NaN_core_by_manual();
+    save_directory = judge_make_directory("Fiji_output");
+    mode_file_directory = save_directory + "\\mode.txt";
+    mode_string = read_text_file_as_string(mode_file_directory);
+    if (mode_string == "Threshold"){
+        set_background_to_NaN_core_by_thresholding(); //This will give you very grainy outline skirts around the cells. But if you don't care about that, you can still use this function
+    }else if (mode_string == "Manual"){
+        set_background_to_NaN_core_by_manual();
+    }else{
+        print("Something is wrong with mode set up! Your file's string is "+mode_string);
+
+    }
 }
 
 
@@ -681,6 +758,8 @@ macro "finish_up [f]"{
 //Functions to auto the whole process together
 macro "auto_everything [z]" {
     run("setup_output_folder [s]");
+
+    run("judge_create_mode_file"); //This will only run once to ask the user to set the cell-outlining mode
 
     run("display_and_slice_renaming [d]");
 
