@@ -279,10 +279,8 @@ macro "judge_create_mode_file"{
         create_text_file(mode_file_directory); //Creat the mode.txt within Fiji_output
 
         mode_option = get_user_mode_choice();
-        print(mode_option);
 
         mode_file = File.open(mode_file_directory);
-        print(mode_file);
         print(mode_file, mode_option); //Write mode_option into mode_file. You can do this because print() is basically an output function
     }
 }
