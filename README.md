@@ -59,11 +59,12 @@ This only requires the human user to select out the folder that stores all the r
 ## Output structure
 The code will create a folder called __Fiji_output__ on the desktop, if that folder doesn't already exist. The folder contains the following directories depending on whether your input stack contains the brightfield:
 
-| Input stack types | 3 slices (with brightfields)                                                                   | 2 slices (without brightfields)                                                      |
-|-----------------|------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
-| Heatmap_images  | Both .jpg & .tif                                                                               | Both .jpg & .tif                                                                     |
-| Heatmap_overlay_brightfield    | Both .jpg & .tif                                                                               | N/A                                                                                  |
-| Histogram_data    | 1 .csv                                                                                         | 1 .csv                                                                               |
-| Histogram_images    | 1 .tif                                                                                         | 1 .tif                                                                               |
-| Montage_images     | Both .jpg & .tif of 2 × 2 montage of 405 nm channel, 488 channel, brightfield, & ratio heatmap | Both .jpg & .tif of 1 × 3 monatge of 405 nm channel, 488 nm channel, & ratio heatmap |
-| Processed_stacks    | 1 .tif                                                                                         | 1 .tif                                                                         |
+| Input stack types           | 3 slices (with brightfields)                                                                   | 2 slices (without brightfields)                                                      |
+|-----------------------------|------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| Heatmap_images              | Both .jpg & .tif                                                                               | Both .jpg & .tif                                                                     |
+| Heatmap_overlay_brightfield | Both .jpg & .tif                                                                               | N/A                                                                                  |
+| Histogram_data              | 1 .csv                                                                                         | 1 .csv                                                                               |
+| Histogram_images            | 1 .tif                                                                                         | 1 .tif                                                                               |
+| Montage_images              | Both .jpg & .tif of 2 × 2 montage of 405 nm channel, 488 channel, brightfield, & ratio heatmap | Both .jpg & .tif of 1 × 3 monatge of 405 nm channel, 488 nm channel, & ratio heatmap |
+| Processed_stacks            | 1 .tif                                                                                         | 1 .tif                                                                               |
+| ROI                         | 1 .zip                                                                                         | 1 .zip                                                                               |

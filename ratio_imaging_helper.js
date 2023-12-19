@@ -181,6 +181,44 @@ function merge_two_images (image_name_str_1, image_name_str_2){
     return new_image_name; //By returning rename_image, I can relocate the image I want really easily
 }
 
+function judge_file_exist(file_directory){ //Judge whether file_directory exists
+    fileExists = File.exists(file_directory);
+
+    // Print the result
+    if (fileExists) {
+        return true;
+    } else {
+        return false
+    }
+}
+
+function create_text_file(file_directory){
+    run("Text Window...", "name=mode width=0 height=0");
+    saveAs("Text", file_directory);
+
+    do {
+        wait(10);
+    } while(!File.exists(file_directory)); //Ensure the text file is successfully created
+
+    run("Close");
+}
+
+function read_text_file_as_string(text_file_directory){
+    if (judge_file_exist(text_file_directory)==true){
+        file_strings=File.openAsString(text_file_directory);
+
+        // I have to do the 2 lines below since when writing the mode text file using the print function, the file will have an additional new line character that I need to get rid of for the comparison later
+        file_strings_array = split(file_strings, "\n");
+        file_string = file_strings_array[0];
+    } else{
+        file_string="Input .txt file doesn't exist!";
+    }
+
+    return file_string;
+}
+
+
+
 
 
 //Functions for file management
@@ -217,6 +255,34 @@ function judge_make_directory(output_folder_name){ //Check whether output_folder
 macro "setup_output_folder [s]"{
     judge_make_directory("Fiji_output"); //Judge whether the desktop has a "Fiji_output" and if not, make that folder
     //If the folder is already there, nothing will happen
+}
+
+
+
+// Functions for setting up the tracing mode
+function get_user_mode_choice(){
+    Dialog.create("Select a mode for outlining the cell");
+    Dialog.addRadioButtonGroup("ImageJ will remember your option until you restart it.\nChoose your outlining method:", newArray("Threshold", "Manual"), 1, 2, "Manual");
+
+    Dialog.show(); // Show the dialog box
+
+    return Dialog.getRadioButton(); // Check the result of the dialog
+}
+macro "judge_create_mode_file"{ // This is a circumvent to create a global variable
+    save_directory = judge_make_directory("Fiji_output");
+    mode_file_directory = save_directory + "\\mode.txt";
+
+    mode_file_judge = judge_file_exist(mode_file_directory);
+    if (mode_file_judge == true){ //You already have the mode file, so this is not your first time to run the script and thus nothing happen here
+        // Do nothing
+    }else { //This is your 1st time to run the script so set up a mode file
+        create_text_file(mode_file_directory); //Creat the mode.txt within Fiji_output
+
+        mode_option = get_user_mode_choice();
+
+        mode_file = File.open(mode_file_directory);
+        print(mode_file, mode_option); //Write mode_option into mode_file. You can do this because print() is basically an output function
+    }
 }
 
 
@@ -409,25 +475,80 @@ function median_filter(radius_num) { //Smooth out the fuzziness
     }
 }
 
+
+function save_selection_as_ROI(){
+    run("Add Selection..."); //Add the selection to overlay but doesn't open the ROI manager and doesn't show you the update on the ROI manager
+
+    run("To ROI Manager");
+    roiManager("Select", 0); //Since you'll have only 1 selection, its index will always be 0
+    roiManager("Rename", "Cell_traced"); //Rename the ROI so when you import them back later, it'll have a meaningful name
+
+    stack_title = get_stack_name();
+    save_directory = judge_make_directory("Fiji_output\\ROI");
+    roiManager("Save", save_directory+"\\"+stack_title+".zip"); //Save as a .zip rather than a .roi here since importing .zip to ImageJ will put things into the ROI manager, while importing .roi will simply make the selection again without adding anything to the ROI manager
+
+}
+
+function save_selection_overlaid_on_image(){
+    stack_title = get_stack_name();
+    save_directory = judge_make_directory("Fiji_output\\ROI_overlay");
+
+
+    height = getHeight();
+    if (height == 2048){ //Make the stroke_thickness suitable for the corresponding image size
+        stroke_thickness = 8;
+    }else if (height == 512){
+        stroke_thickness = 2;
+    }else{
+        print("stroke_thickness not defined for height "+height);
+    }
+    roiManager("Set Line Width", stroke_thickness); //Make the cell trace line thicker
+
+    run("Flatten", "slice"); //This will generate a new window
+    //The slice option will only overlay the selection on the slice that you're seeing
+
+    saveAs("Jpeg", save_directory+"\\"+stack_title+".jpg");
+    close();
+}
+
+
 function set_background_to_NaN_core_by_thresholding() { // Set background pixels to NaN by thresholding
     /* setAutoThreshold("Otsu dark no-reset");
     run("NaN Background", "slice"); */
-    //The lines above run things very fast without giving you a chance to adjust things manually so I commented them out
+    //The lines above run things very fast without giving you a chance to adjust things manually, so I commented them out
 
     run("Threshold..."); //This gives you a way to adjust the thresholding
+    setAutoThreshold("Otsu dark no-reset"); //Have the threshold method as Otsu so the user doesn't forget
 
     //Adjust the threshold
     waitForUser("Adjust the threshold and hit OK"); //Hitting OK will make the run the next line, which is to make the non-selected part as NaN automatically
     //The threshold window will also have an Apply button. Don't hit on that
 
+    run("Create Selection");
+    save_selection_as_ROI();
+    save_selection_overlaid_on_image();
+
+    //The 2 lines below remove the selection and the ROI so it doesn't interfere with the downstream of how the thresholding work
+    roiManager("reset"); //Remove the selection's ROI
+    run("Select None"); //Remove any selection
+
     run("NaN Background", "slice");
     close("Threshold");
+
+    close("ROI Manager"); //Close ROI manager after using save_ROI() and save_selection_overlaid_on_image()
 }
+
 
 function set_background_to_NaN_core_by_manual(){ // Set background pixels to NaN by manual drawing
     setTool("freehand"); //Set the selection tool to freehand, which is the most commonly used tool for outline a cell
 
     waitForUser("Manually outline the cell and hit OK");
+
+    save_selection_as_ROI(); //Save the manually drawn ROI to avoid drawing again
+    save_selection_overlaid_on_image(); //Save the ROI overlaid on the image
+    roiManager("show none"); //The developer of ImageJ said that you either use roiManager("reset"); (will delete ROIs from the list) or roiManager("show none"); (make ROIs invisible so use this one if you want to keep the ROIs) before close("ROI Manager"); to avoid a window pop out asking you whether you want to save the displayed ROI as an overlay?
+    // For that pop out window, both "Discard" and "Save as Overlay" are non-destructive to the pixel values.
+    close("ROI Manager"); //Close ROI manager after using save_ROI() and save_selection_overlaid_on_image()
 
     run("Make Inverse"); //Select the outside of your cells, aka the background pixels
 
@@ -441,8 +562,17 @@ macro "set_background_to_NaN [x]" {
     convert_to_32_bit(); //Be ready for the later image division. This allows the 32-bit data type, aka float, and also allows for the NaN data type
     median_filter(2); //Dave likes to use radius = 2 for the median filter
 
-    // set_background_to_NaN_core_by_thresholding(); //This will give you very grainy outline skirts around the cells. But if you don't care about that, you can still use this function
-    set_background_to_NaN_core_by_manual();
+    save_directory = judge_make_directory("Fiji_output");
+    mode_file_directory = save_directory + "\\mode.txt";
+    mode_string = read_text_file_as_string(mode_file_directory);
+    if (mode_string == "Threshold"){
+        set_background_to_NaN_core_by_thresholding(); //This will give you very grainy outline skirts around the cells. But if you don't care about that, you can still use this function
+    }else if (mode_string == "Manual"){
+        set_background_to_NaN_core_by_manual();
+    }else{
+        print("Something is wrong with mode set up! Your file's string is "+mode_string);
+
+    }
 }
 
 
@@ -478,6 +608,7 @@ function apply_LUT(input_image_str, LUT_name_str) {
     selectImage(input_image_str);
     run(LUT_name_str);
 
+    // !!!!!!!!!You shouldn't do this enhance contrast step here since it's wrong. You should do it in a later batch processing step
     run("Enhance Contrast...", "saturated=0.40 normalize"); //Do some auto-contrast. This is different from run("Enhance Contrast", "saturated=0.40");
     //"saturated" is default to be 0.35% but the GEVAL protocol requires a 0.4% saturation
     //"normalize" is also required by the GEVAL protocol but this is only on 1 ratio image (I tested here of with and without the normalize option and it seems like with the normalize here make sense in the final all heatmaps normalized together)
@@ -682,6 +813,8 @@ macro "finish_up [f]"{
 macro "auto_everything [z]" {
     run("setup_output_folder [s]");
 
+    run("judge_create_mode_file"); //This will only run once to ask the user to set the cell-outlining mode
+
     run("display_and_slice_renaming [d]");
 
     setTool("rectangle"); //Change the selection tool to rectangle which is the most commonly used tool for selecting the background
@@ -737,7 +870,7 @@ function batch_open_files(file_directories_array){
 
 function normalize_heatmaps (){
     run("Images to Stack", "use"); //Make the stack
-    run("Enhance Contrast...", "saturated=0.4 normalize");
+    run("Enhance Contrast...", "saturated=0.4 normalize"); //You should only normalize this within a group not all the images in 1 batch of experiment. !!!!!!!!!!!Test on this--whether normalize them within the group or within the whole experiments will make any difference
 }
 
 function rename_heatmaps(){
