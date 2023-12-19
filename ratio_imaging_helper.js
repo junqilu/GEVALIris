@@ -475,6 +475,43 @@ function median_filter(radius_num) { //Smooth out the fuzziness
     }
 }
 
+
+function save_selection_as_ROI(){
+    run("Add Selection..."); //Add the selection to overlay but doesn't open the ROI manager and doesn't show you the update on the ROI manager
+
+    run("To ROI Manager");
+    roiManager("Select", 0); //Since you'll have only 1 selection, its index will always be 0
+    roiManager("Rename", "Cell_traced"); //Rename the ROI so when you import them back later, it'll have a meaningful name
+
+    stack_title = get_stack_name();
+    save_directory = judge_make_directory("Fiji_output\\ROI");
+    roiManager("Save", save_directory+"\\"+stack_title+".zip"); //Save as a .zip rather than a .roi here since importing .zip to ImageJ will put things into the ROI manager, while importing .roi will simply make the selection again without adding anything to the ROI manager
+
+}
+
+function save_selection_overlaid_on_image(){
+    stack_title = get_stack_name();
+    save_directory = judge_make_directory("Fiji_output\\ROI_overlay");
+
+
+    height = getHeight();
+    if (height == 2048){ //Make the stroke_thickness suitable for the corresponding image size
+        stroke_thickness = 8;
+    }else if (height == 512){
+        stroke_thickness = 2;
+    }else{
+        print("stroke_thickness not defined for height "+height);
+    }
+    roiManager("Set Line Width", stroke_thickness); //Make the cell trace line thicker
+
+    run("Flatten", "slice"); //This will generate a new window
+    //The slice option will only overlay the selection on the slice that you're seeing
+
+    saveAs("Jpeg", save_directory+"\\"+stack_title+".jpg");
+    close();
+}
+
+
 function set_background_to_NaN_core_by_thresholding() { // Set background pixels to NaN by thresholding
     /* setAutoThreshold("Otsu dark no-reset");
     run("NaN Background", "slice"); */
