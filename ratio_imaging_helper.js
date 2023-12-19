@@ -539,27 +539,16 @@ function set_background_to_NaN_core_by_thresholding() { // Set background pixels
 }
 
 
-function save_manual_ROI(){
-    run("Add Selection..."); //Add the selection to overlay but doesn't open the ROI manager and doesn't show you the update on the ROI manager
-
-    run("To ROI Manager");
-    roiManager("Select", 0); //Since you'll have only 1 selection, its index will always be 0
-    roiManager("Rename", "Cell_traced"); //Rename the ROI so when you import them back later, it'll have a meaningful name
-
-    stack_title = get_stack_name();
-    save_directory = judge_make_directory("Fiji_output\\ROI");
-    roiManager("Save", save_directory+"\\"+stack_title+".zip"); //Save as a .zip rather than a .roi here since importing .zip to ImageJ will put things into the ROI manager, while importing .roi will simply make the selection again without adding anything to the ROI manager
-
-    roiManager("show none"); //The developer of ImageJ said that you either use roiManager("reset"); or roiManager("show none"); before close("ROI Manager"); to avoid a window pop out asking you whether you want to save the displayed ROI as an overlay?
-    close("ROI Manager");
-}
-
 function set_background_to_NaN_core_by_manual(){ // Set background pixels to NaN by manual drawing
     setTool("freehand"); //Set the selection tool to freehand, which is the most commonly used tool for outline a cell
 
     waitForUser("Manually outline the cell and hit OK");
 
-    save_manual_ROI(); //Save the manually drawn ROI to avoid drawing again
+    save_selection_as_ROI(); //Save the manually drawn ROI to avoid drawing again
+    save_selection_overlaid_on_image(); //Save the ROI overlaid on the image
+    roiManager("show none"); //The developer of ImageJ said that you either use roiManager("reset"); (will delete ROIs from the list) or roiManager("show none"); (make ROIs invisible so use this one if you want to keep the ROIs) before close("ROI Manager"); to avoid a window pop out asking you whether you want to save the displayed ROI as an overlay?
+    // For that pop out window, both "Discard" and "Save as Overlay" are non-destructive to the pixel values.
+    close("ROI Manager"); //Close ROI manager after using save_ROI() and save_selection_overlaid_on_image()
 
     run("Make Inverse"); //Select the outside of your cells, aka the background pixels
 
