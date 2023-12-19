@@ -515,16 +515,27 @@ function save_selection_overlaid_on_image(){
 function set_background_to_NaN_core_by_thresholding() { // Set background pixels to NaN by thresholding
     /* setAutoThreshold("Otsu dark no-reset");
     run("NaN Background", "slice"); */
-    //The lines above run things very fast without giving you a chance to adjust things manually so I commented them out
+    //The lines above run things very fast without giving you a chance to adjust things manually, so I commented them out
 
     run("Threshold..."); //This gives you a way to adjust the thresholding
+    setAutoThreshold("Otsu dark no-reset"); //Have the threshold method as Otsu so the user doesn't forget
 
     //Adjust the threshold
-    waitForUser("Ensure your threshold method is Otsu.\nAdjust the threshold and hit OK"); //Hitting OK will make the run the next line, which is to make the non-selected part as NaN automatically
+    waitForUser("Adjust the threshold and hit OK"); //Hitting OK will make the run the next line, which is to make the non-selected part as NaN automatically
     //The threshold window will also have an Apply button. Don't hit on that
+
+    run("Create Selection");
+    save_selection_as_ROI();
+    save_selection_overlaid_on_image();
+
+    //The 2 lines below remove the selection and the ROI so it doesn't interfere with the downstream of how the thresholding work
+    roiManager("reset"); //Remove the selection's ROI
+    run("Select None"); //Remove any selection
 
     run("NaN Background", "slice");
     close("Threshold");
+
+    close("ROI Manager"); //Close ROI manager after using save_ROI() and save_selection_overlaid_on_image()
 }
 
 
