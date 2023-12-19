@@ -268,7 +268,7 @@ function get_user_mode_choice(){
 
     return Dialog.getRadioButton(); // Check the result of the dialog
 }
-macro "judge_create_mode_file"{
+macro "judge_create_mode_file"{ // This is a circumvent to create a global variable
     save_directory = judge_make_directory("Fiji_output");
     mode_file_directory = save_directory + "\\mode.txt";
 
