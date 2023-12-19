@@ -262,7 +262,7 @@ macro "setup_output_folder [s]"{
 // Functions for setting up the tracing mode
 function get_user_mode_choice(){
     Dialog.create("Select a mode for outlining the cell");
-    Dialog.addRadioButtonGroup("Choose one:", newArray("Threshold", "Manual"), 1, 2, "Manual");
+    Dialog.addRadioButtonGroup("ImageJ will remember your option until you restart it.\nChoose your outlining method:", newArray("Threshold", "Manual"), 1, 2, "Manual");
 
     Dialog.show(); // Show the dialog box
 
