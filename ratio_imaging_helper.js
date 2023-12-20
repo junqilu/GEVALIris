@@ -608,8 +608,8 @@ function apply_LUT(input_image_str, LUT_name_str) {
     selectImage(input_image_str);
     run(LUT_name_str);
 
-    // !!!!!!!!!You shouldn't do this enhance contrast step here since it's wrong. You should do it in a later batch processing step
-    run("Enhance Contrast...", "saturated=0.40 normalize"); //Do some auto-contrast. This is different from run("Enhance Contrast", "saturated=0.40");
+
+    // run("Enhance Contrast...", "saturated=0.40 normalize"); //Do some auto-contrast. This is different from run("Enhance Contrast", "saturated=0.40");
     //"saturated" is default to be 0.35% but the GEVAL protocol requires a 0.4% saturation
     //"normalize" is also required by the GEVAL protocol but this is only on 1 ratio image (I tested here of with and without the normalize option and it seems like with the normalize here make sense in the final all heatmaps normalized together)
     //If you want to normalize several ratio images together you need to first combine them in a stack, so that the same minimum and maximum are applied to all ratio images uniformly
@@ -870,7 +870,7 @@ function batch_open_files(file_directories_array){
 
 function normalize_heatmaps (){
     run("Images to Stack", "use"); //Make the stack
-    run("Enhance Contrast...", "saturated=0.4 normalize"); //You should only normalize this within a group not all the images in 1 batch of experiment. !!!!!!!!!!!Test on this--whether normalize them within the group or within the whole experiments will make any difference
+    run("Enhance Contrast...", "saturated=0.40 normalize"); //You should only normalize this within a group not all the images in 1 batch of experiment.
 }
 
 function rename_heatmaps(){
@@ -890,7 +890,7 @@ macro "normalize_and_save_heatmaps [n]" {
 
     batch_open_files(heatmap_files_array);
 
-    normalize_heatmaps(); //This normalizes all the heatmaps
+    normalize_heatmaps(); //This normalizes all the heatmaps. Later I found out that you shouldn't really do the normalization here since "Normalize" has a different meaning in histograms
 
     rename_heatmaps();
 
