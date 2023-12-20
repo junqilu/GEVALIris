@@ -890,7 +890,7 @@ macro "normalize_and_save_heatmaps [n]" {
 
     batch_open_files(heatmap_files_array);
 
-    normalize_heatmaps(); //This normalizes all the heatmaps
+    normalize_heatmaps(); //This normalizes all the heatmaps. Later I found out that you shouldn't really do the normalization here since "Normalize" has a different meaning in histograms
 
     rename_heatmaps();
 
