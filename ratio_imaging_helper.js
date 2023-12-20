@@ -870,7 +870,7 @@ function batch_open_files(file_directories_array){
 
 function normalize_heatmaps (){
     run("Images to Stack", "use"); //Make the stack
-    run("Enhance Contrast...", "saturated=0.4 normalize"); //You should only normalize this within a group not all the images in 1 batch of experiment. !!!!!!!!!!!Test on this--whether normalize them within the group or within the whole experiments will make any difference
+    run("Enhance Contrast...", "saturated=0.40 normalize"); //You should only normalize this within a group not all the images in 1 batch of experiment.
 }
 
 function rename_heatmaps(){
