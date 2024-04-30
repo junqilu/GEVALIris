@@ -13,7 +13,7 @@ function append_to_array(input_array, append_value) { //ImageJ script seems to l
 
 }
 
-function locate_images_by_regex(regex_str, input_folder_directory){//This function return s an array of images that match the regex_str
+function locate_images_by_regex(regex_str, input_folder_directory) {//This function return s an array of images that match the regex_str
     found_images_array = newArray();
 
     images = getFileList(input_folder_directory);
@@ -27,7 +27,7 @@ function locate_images_by_regex(regex_str, input_folder_directory){//This functi
 
     if (found_images_array.length > 0) {
         return found_images_array; //This should be a string for the image's name
-    }else {
+    } else {
         print("No match imaged found!");
         return "No match imaged found!";
     }
@@ -38,16 +38,16 @@ function createMontage(condition, col_num, row_num, label_fontsize, inputFolder,
     // Array to store the images in the montage
     images = newArray();
 
-    images = locate_images_by_regex("^.*of "+condition+"_\\d{2}.\\d{2}.\\d{2}.tif$", inputFolder);
+    images = locate_images_by_regex("^.*of " + condition + "_\\d{2}.\\d{2}.\\d{2}.tif$", inputFolder);
 
     for (i = 0; i < images.length; i++) {
         currentImage = images[i];
-        open(inputFolder+"/"+currentImage);
+        open(inputFolder + "/" + currentImage);
     }
 
     run("Images to Stack", "use"); // Make all the images into a stack
 
-    run("Make Montage...", "columns="+col_num+" rows="+row_num+" scale=1 font="+label_fontsize+" label"); // Make the montage
+    run("Make Montage...", "columns=" + col_num + " rows=" + row_num + " scale=1 font=" + label_fontsize + " label"); // Make the montage
 
 
     // Save the montage as a new PNG image
@@ -71,25 +71,88 @@ function getUserInput(prompt, defaultValue) {
     return userInput;
 }
 
+function getStringArrayInput(prompt, defaultInput) {
+    userInput = getString(prompt, defaultInput);
 
-// Define input and output folders
-inputFolder = getDirectory("Choose a Folder with TIF images");
-outputFolder = getDirectory("Choose or Create an Output Folder");
+    // Split the user input by ","
+    userInputArray = split(userInput, ",");
 
-col_num = getUserInput("Input the number of images per col", 5);
-row_num = getUserInput("Input the number of images per row", 3);
-label_fontsize = 20;
+    // Trim leading and trailing spaces from each element
+    for (i = 0; i < userInputArray.length; i++) {
+        userInputArray[i] = trim(userInputArray[i]);
+    }
 
-// List of conditions
-conditions = newArray("GEVALNull_EtOH", "GEVALNull_AVN", "GEVALNull_MPA", "GEVAL30_EtOH", "GEVAL30_AVN", "GEVAL30_MPA");
-
-
-// Iterate over the conditions using index
-for (index = 0; index < lengthOf(conditions); index++) {
-    condition = conditions[index];
-    createMontage(condition, col_num, row_num, label_fontsize, inputFolder, outputFolder);
+    // Return the array of string inputs
+    return userInputArray;
 }
 
+macro
+"batch_set_intensity_range [b]"
+{
+    // Define input and output folders
+    inputFolder = getDirectory("Choose the input folder with .tif images");
+    outputFolder = getDirectory("Choose or Create an output folder");
+
+// Get the list of TIFF files in the input folder
+    list = getFileList(inputFolder);
+
+// Set the min and max values for normalization
+    minValue = 1.000E-4; // I don't ask the user since we want to avoid the min = 0 anyway. If using 1.000E-4 as the default, the min will be 0
+    maxValue = getUserInput("Input the number of max intensity", 3);
+
+// Process each TIFF file in the input folder
+    for (i = 0; i < list.length; i++) {
+        if (endsWith(list[i], ".tif")) {
+            // Open the current TIFF image
+            open(inputFolder + list[i]);
+
+            // Set min and max values
+            setMinAndMax(minValue, maxValue);
+
+            // Extract file name without extension
+            fileNameWithoutExt = File.getNameWithoutExtension(list[i]);
+
+            // Save as PNG in the output folder
+            saveAs("PNG", outputFolder + fileNameWithoutExt + ".png");
+
+            // Save as TIFF in the output folder
+            saveAs("TIFF", outputFolder + fileNameWithoutExt + ".tif");
+
+            // Close the current image
+            close();
+        }
+    }
+
+    // Inform the user that the process is complete
+    print("Processing complete.");
+}
+
+
+macro
+"generate_montage [m]"
+{
+    print("Ensure you have set all the images to the same intensity range!");
+
+    // Define input and output folders
+    inputFolder = getDirectory("Choose a Folder with TIF images");
+    outputFolder = getDirectory("Choose or Create an Output Folder");
+
+    col_num = getUserInput("Input the number of images per col", 5);
+    row_num = getUserInput("Input the number of images per row", 3);
+    label_fontsize = 20;
+
+    // List of conditions
+    conditions = getStringArrayInput("Type in all conditions separated by comma", "GEVALNull_EtOH, GEVALNull_AVN, GEVALNull_MPA, GEVAL30_EtOH, GEVAL30_AVN, GEVAL30_MPA"); //All the spaces after split by the comma will be removed
+
+    // Iterate over the conditions using index
+    for (index = 0; index < lengthOf(conditions); index++) {
+        condition = conditions[index];
+        createMontage(condition, col_num, row_num, label_fontsize, inputFolder, outputFolder);
+    }
+
+    // Inform the user that the process is complete
+    print("Processing complete.");
+}
 
 
 
