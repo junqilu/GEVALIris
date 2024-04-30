@@ -448,6 +448,13 @@ function force_close_roi_manager() {
 macro "clean_background [c]" {
     measure_background();
 
+
+    heatmap_image_name = get_stack_name();
+
+    FileName = "background_data_for_"+heatmap_image_name+ ".csv";
+    save_directory = judge_make_directory("Fiji_output\\Background_data");
+    saveAs("Results", save_directory + "\\"+ FileName);
+
     avg_background = average_background();
 
     run("Select None"); //This deselect anything on the images. Without this line, the next line of subtracting the background will only occur within the last ROI
