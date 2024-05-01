@@ -550,9 +550,19 @@ function set_background_to_NaN_core() {
     FileName = "Background_NaN_image_for_" + stack_title + ".tif";
     saveAs("Tiff", save_directory + "\\" + FileName); //The whole stack will be saved together as a 32-bit. This is easier than destack, save each slice individually, and then restack
 
+    rename(stack_title+".ims"); //Rename back the image since the saveAs will change the file name
+
     save_shape_channels_data(); //Save the shape measurements on the 2 channels
 
     setSlice(2); //Now that all the things are done, go back to Ex488
+}
+
+function save_channels_histogram_data_and_image(){
+    stack_title = get_stack_name();
+    setSlice(1);
+    histogram_data_and_image_save(256, stack_title,"background_NaN_405");
+    setSlice(2);
+    histogram_data_and_image_save(256, stack_title,"background_NaN_488");
 }
 
 function set_background_to_NaN_core_by_thresholding() { // Set background pixels to NaN by thresholding
@@ -574,14 +584,17 @@ function set_background_to_NaN_core_by_thresholding() { // Set background pixels
 
     set_background_to_NaN_core(); //This will really go inside each slide and set the background as NaN
 
+    save_channels_histogram_data_and_image();
+
     //The 2 lines below remove the selection and the ROI so it doesn't interfere with the downstream of how the thresholding work
-    roiManager("reset"); //Remove the selection's ROI
+    // roiManager("reset"); //Remove the selection's ROI
+    roiManager("show none");
     run("Select None"); //Remove any selection
 
     // run("NaN Background", "slice"); //Not needed anymore since the background will be set to NaN by the codes above
     close("Threshold");
 
-    close("ROI Manager"); //Close ROI manager after using save_ROI() and save_selection_overlaid_on_image()
+    // close("ROI Manager"); //Close ROI manager after using save_ROI() and save_selection_overlaid_on_image()
 }
 
 
@@ -595,9 +608,12 @@ function set_background_to_NaN_core_by_manual() { // Set background pixels to Na
 
     set_background_to_NaN_core(); //This will really go inside each slide and set the background as NaN
 
+    save_channels_histogram_data_and_image();
+
     roiManager("show none"); //The developer of ImageJ said that you either use roiManager("reset"); (will delete ROIs from the list) or roiManager("show none"); (make ROIs invisible so use this one if you want to keep the ROIs) before close("ROI Manager"); to avoid a window pop out asking you whether you want to save the displayed ROI as an overlay?
     // For that pop out window, both "Discard" and "Save as Overlay" are non-destructive to the pixel values.
-    close("ROI Manager"); //Close ROI manager after using save_ROI() and save_selection_overlaid_on_image()
+    run("Select None"); //Remove any selection
+    // close("ROI Manager"); //Close ROI manager after using save_ROI() and save_selection_overlaid_on_image()
 
     //The lines below are not needed since you have the set_background_to_NaN_core();
     // run("Make Inverse"); //Select the outside of your cells, aka the background pixels
@@ -690,7 +706,7 @@ macro
 
 
 // Below are additional functions to generate histogram and data for quantification check and comparison
-function histogram_data_generation_and_save(bins_num, input_stack_name) { //This should be equivalent to you click on the ratio heatmap, click Analyze -> Histogram -> List, and save the pop out result data table locally
+function histogram_data_generation_and_save(bins_num, input_stack_name, file_prefix) { //This should be equivalent to you click on the ratio heatmap, click Analyze -> Histogram -> List, and save the pop out result data table locally
 
     getHistogram(values, counts, bins_num); //Here a stack histogram with bins_num
     // values and counts are the things that you'll be using below to output the .csv
@@ -708,13 +724,13 @@ function histogram_data_generation_and_save(bins_num, input_stack_name) { //This
         stack_name = input_stack_name;
     }
 
-    FileName = "histogram_data_for_" + stack_name + ".csv";
+    FileName = "histogram_data_for_" + file_prefix + "_" + stack_name + ".csv";
     saveAs("Results", save_directory + "\\" + FileName);
 
     close(FileName); //Close the window for the histogram data
 }
 
-function histogram_image_generation_and_save(bins_num, input_stack_name) {
+function histogram_image_generation_and_save(bins_num, input_stack_name, file_prefix) {
     run("Histogram", "bins=" + bins_num + " use x_min=0 x_max=1 y_max=Auto"); //Generate the histogram from the GUI
     // "x_min=0 x_max=1" because this is the ratio heatmap and all the ratios are between 0 and 1
 
@@ -726,19 +742,17 @@ function histogram_image_generation_and_save(bins_num, input_stack_name) {
         stack_name = input_stack_name;
     }
 
-    FileName = "histogram_image_for_" + stack_name + ".tif";
+    FileName = "histogram_image_for_" + file_prefix + "_" + stack_name + ".tif";
     saveAs("Tiff", save_directory + "\\" + FileName);
 
     close(FileName); //Close the window for the histogram GUI
 }
 
-macro
-"histogram_data_and_image_save"
-{
-    bins_num = 256; // bins_num is default to be 256 (16 × 16) and I like this number. It's basically the number of columns in your histogram
-    histogram_data_generation_and_save(bins_num, "individual img"); //ImageJ  macro language doesn't support optional argument so this is a circumvent. For generating histogram on the run, just use "individual img". For batch image processing, use the filename of the iterated file to replace the "individual img"
+function histogram_data_and_image_save(bins_num, input_stack_name, save_file_prefix) {
+    // bins_num is default to be 256 (16 × 16) and I like this number. It's basically the number of columns in your histogram
+    histogram_data_generation_and_save(bins_num, input_stack_name, save_file_prefix); //ImageJ  macro language doesn't support optional argument so this is a circumvent. For generating histogram on the run, just use "individual img". For batch image processing, use the filename of the iterated file to replace the "individual img"
 
-    histogram_image_generation_and_save(bins_num, "individual img");
+    histogram_image_generation_and_save(bins_num, input_stack_name, save_file_prefix);
 }
 
 
@@ -771,13 +785,13 @@ macro
     //Try to reobtain the stack_name from the heatmap's image name
     heatmap_image = locate_image_by_regex("^Heatmap.*");
 
-    stack_name = substring(heatmap_image, 11, lengthOf(heatmap_image)); //Remove the "Heatmap of " from beginning to get the stack_name
+    stack_name = substring(heatmap_image, 36, lengthOf(heatmap_image)); //Remove the "Heatmap of " from beginning to get the stack_name
 
     if (nImages > 3) {
         run("Merge Channels...", "c1=[" + stack_name + "_405] c2=[" + stack_name + "_488] c3=[" + stack_name + "_brightfield] c4=[Heatmap of " + stack_name + "] create keep");
         //Making merge channel image is the only way to have different LUT on different slices of a stack
     } else {
-        run("Merge Channels...", "c1=[" + stack_name + "_405] c2=[" + stack_name + "_488] c3=[Heatmap of " + stack_name + "] create keep");
+        run("Merge Channels...", "c1=[" + stack_name + "_405] c2=[" + stack_name + "_488] c3=[Heatmap of Background_NaN_image_for_" + stack_name + "] create keep");
     }
 
 
@@ -833,7 +847,7 @@ macro
 function save_processed_stack() {
     //Try to reobtain the stack_name from the heatmap's image name
     heatmap_image = locate_image_by_regex("^Heatmap.*");
-    stack_name = substring(heatmap_image, 11, lengthOf(heatmap_image)); //Remove the "Heatmap of " from beginning to get the stack_name
+    stack_name = substring(heatmap_image, 36, lengthOf(heatmap_image)); //Remove the "Heatmap of " from beginning to get the stack_name
 
     processed_stack_name = "Processed stack of " + stack_name;
     rename_image("Composite", processed_stack_name);
@@ -850,8 +864,8 @@ macro
     save_processed_stack();
 
     heatmap_image = locate_image_by_regex("^Heatmap.*");
-    heatmap_image_name_array = split(heatmap_image, "of ");
-    stack_name = heatmap_image_name_array[1];
+
+    stack_name = substring(heatmap_image, lengthOf("Heatmap of Background_NaN_image_for_"), lengthOf(heatmap_image));
 
     //Close up all remaining windows from processing this stack
     close_windows_array = locate_images_by_regex("^" + stack_name + ".*");
@@ -881,7 +895,7 @@ macro
 
     run("heatmap_generation_and_save [h]");
 
-    run("histogram_data_and_image_save");
+    histogram_data_and_image_save(256, "individual img","heatmap"); // bins_num is default to be 256 (16 × 16) and I like this number. It's basically the number of columns in your histogram
 
     if (nImages > 3) { //Only overlay the heatmap on brightfield when you have the brightfield (nImages = 4 in this case)
         run("overlay_heatmap_on_brightfield_and_save [o]");
