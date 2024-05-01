@@ -7,13 +7,9 @@
 //Indexes that start from 1: slices in a stack
 
 
-
-
-
-
 //Basic functions
 //This section contains basic functions that will be used in other functions
-function concatenate_array_by_character(input_array, input_character){
+function concatenate_array_by_character(input_array, input_character) {
     resultString = ""; // Initialize an empty string to hold the concatenated result
 
 
@@ -28,19 +24,19 @@ function concatenate_array_by_character(input_array, input_character){
     return resultString;
 }
 
-function get_stack_name(){ //Obtain the stack name from the current window
+function get_stack_name() { //Obtain the stack name from the current window
     //This may not be reliable when you have multiple windows since it seems like to just get the title from the current activated window
     stack_title = getTitle();
     stack_name_array = split(stack_title, "."); //file_name is an array
 
-    if (stack_name_array.length == 1){ //My image names won't have "." in the middle so the first item of stack_name_array is always the image name itself
+    if (stack_name_array.length == 1) { //My image names won't have "." in the middle so the first item of stack_name_array is always the image name itself
         stack_name = stack_name_array[0];
-    } else if (stack_name_array.length > 1){
-        stack_name_array = Array.slice(stack_name_array, 0, stack_name_array.length-1); //Remove the last item of stack_name_array, which is usually the extension name
+    } else if (stack_name_array.length > 1) {
+        stack_name_array = Array.slice(stack_name_array, 0, stack_name_array.length - 1); //Remove the last item of stack_name_array, which is usually the extension name
         // Array.print(stack_name_array); //For debugging
 
         stack_name = concatenate_array_by_character(stack_name_array, "."); //Other people's image names can have "." in the middle, so this is a way to restore those middle "."
-    }else{
+    } else {
         //Do nothing
     }
 
@@ -84,7 +80,7 @@ function convert_to_32_bit() { //You have to do this to have float results (32-b
     run("32-bit"); //Convert image type from 16-bit to 32-bit. This applies to all the slices in the stack
 }
 
-function locate_image_by_regex(regex_str){//This function only outputs 1 unique image that matches regex_str
+function locate_image_by_regex(regex_str) {//This function only outputs 1 unique image that matches regex_str
     found_match = false;
 
     images = getList("image.titles");
@@ -99,12 +95,12 @@ function locate_image_by_regex(regex_str){//This function only outputs 1 unique 
 
     if (found_match) {
         return output_image; //This should be a string for the image's name
-    }else {
+    } else {
         return "No matched image was found!";
     }
 }
 
-function locate_images_by_regex(regex_str){//This function return s an array of images that match the regex_str
+function locate_images_by_regex(regex_str) {//This function return s an array of images that match the regex_str
     found_images_array = newArray();
 
     images = getList("image.titles");
@@ -118,70 +114,70 @@ function locate_images_by_regex(regex_str){//This function return s an array of 
 
     if (found_images_array.length > 0) {
         return found_images_array; //This should be a string for the image's name
-    }else {
+    } else {
         return "No match imaged found!";
     }
 }
 
-function judge_substr_in_str(substr, str){ //Judge whether the str contains a substr
-    if (matches(str, ".*"+substr+".*")){
+function judge_substr_in_str(substr, str) { //Judge whether the str contains a substr
+    if (matches(str, ".*" + substr + ".*")) {
         return true;
 
-    }else {
+    } else {
         return false;
     }
 }
 
-function save_image (save_directory,image_name_str, format_str){
+function save_image(save_directory, image_name_str, format_str) {
     //To keep things simple, image_name_str will be the image window's title but also the filename when save the image locally
 
     //Translate format_str into the corresponding file extension
     if (format_str == "Tiff") {
         file_extension = ".tif"; //This is the raw image format, and it has no colors. But it can be import back to ImageJ for further adjustment
-    }else if (format_str == "Jpeg") {
+    } else if (format_str == "Jpeg") {
         file_extension = ".jpg"; //This is for the display and presentation etc since it has colors. You can further adjust this image but it'll be different from what it looks like if you do it within ImageJ all the way without the exporting and importing
     } else {
         //Do nothing
         //You can keep adding more translation on the file formats here
     }
 
-    saveAs(format_str, save_directory+image_name_str+file_extension);
+    saveAs(format_str, save_directory + image_name_str + file_extension);
 
-    if (file_extension != ".jpg"){ //Only rename if file_extension is not ".jpg". This is because when you save an image as .jpg, it doesn't change the image window title. This inconsistency is very annoying and this special handling might cause some troubles in the future if the programmers of ImageJ fix this inconsistency
-        rename_image(image_name_str+file_extension, image_name_str); //Rename the image back to get rid of the file extension part. This makes the referencing easier in later steps
+    if (file_extension != ".jpg") { //Only rename if file_extension is not ".jpg". This is because when you save an image as .jpg, it doesn't change the image window title. This inconsistency is very annoying and this special handling might cause some troubles in the future if the programmers of ImageJ fix this inconsistency
+        rename_image(image_name_str + file_extension, image_name_str); //Rename the image back to get rid of the file extension part. This makes the referencing easier in later steps
     }
 }
 
-function save_images(save_directory,image_name_str, format_array){
-    for (i = 0; i < format_array.length; i++){
-        save_image(save_directory,image_name_str,format_array[i]);
+function save_images(save_directory, image_name_str, format_array) {
+    for (i = 0; i < format_array.length; i++) {
+        save_image(save_directory, image_name_str, format_array[i]);
     }
 }
 
 
 function rename_image(original_name_str, new_name_str) {
-    if (original_name_str != new_name_str && isOpen(original_name_str)){ //You only rename the image if it is currently opened. This can avoid some errors
+    if (original_name_str != new_name_str && isOpen(original_name_str)) { //You only rename the image if it is currently opened. This can avoid some errors
         selectImage(original_name_str);
         rename(new_name_str);
         return new_name_str;
-    }else{
-        print("No window for "+original_name_str+" was found so cannot rename it!");
-        print("Your original_name_str is "+original_name_str);
-        print("Your new_name_str is "+new_name_str);
+    } else {
+        print("No window for " + original_name_str + " was found so cannot rename it!");
+        print("Your original_name_str is " + original_name_str);
+        print("Your new_name_str is " + new_name_str);
         print("If your original_name_str and new_name_str are only different in a string for extension, you can ignore this");
     }
 }
 
-function merge_two_images (image_name_str_1, image_name_str_2){
-    run("Merge Channels...", "c1=["+image_name_str_1+"] c2="+image_name_str_2+" create keep");
+function merge_two_images(image_name_str_1, image_name_str_2) {
+    run("Merge Channels...", "c1=[" + image_name_str_1 + "] c2=" + image_name_str_2 + " create keep");
     //"create" means to check for "Create composite"
     //"keep" means to check for "Keep source images"
 
-    new_image_name = rename_image("Composite", "Composite of "+image_name_str_1+" and "+image_name_str_2);
+    new_image_name = rename_image("Composite", "Composite of " + image_name_str_1 + " and " + image_name_str_2);
     return new_image_name; //By returning rename_image, I can relocate the image I want really easily
 }
 
-function judge_file_exist(file_directory){ //Judge whether file_directory exists
+function judge_file_exist(file_directory) { //Judge whether file_directory exists
     fileExists = File.exists(file_directory);
 
     // Print the result
@@ -192,42 +188,39 @@ function judge_file_exist(file_directory){ //Judge whether file_directory exists
     }
 }
 
-function create_text_file(file_directory){
+function create_text_file(file_directory) {
     run("Text Window...", "name=mode width=0 height=0");
     saveAs("Text", file_directory);
 
     do {
         wait(10);
-    } while(!File.exists(file_directory)); //Ensure the text file is successfully created
+    } while (!File.exists(file_directory)); //Ensure the text file is successfully created
 
     run("Close");
 }
 
-function read_text_file_as_string(text_file_directory){
-    if (judge_file_exist(text_file_directory)==true){
-        file_strings=File.openAsString(text_file_directory);
+function read_text_file_as_string(text_file_directory) {
+    if (judge_file_exist(text_file_directory) == true) {
+        file_strings = File.openAsString(text_file_directory);
 
         // I have to do the 2 lines below since when writing the mode text file using the print function, the file will have an additional new line character that I need to get rid of for the comparison later
         file_strings_array = split(file_strings, "\n");
         file_string = file_strings_array[0];
-    } else{
-        file_string="Input .txt file doesn't exist!";
+    } else {
+        file_string = "Input .txt file doesn't exist!";
     }
 
     return file_string;
 }
 
 
-
-
-
 //Functions for file management
-function obtain_desktop_directory(){//Obtain the string for desktop's directory on different computer
+function obtain_desktop_directory() {//Obtain the string for desktop's directory on different computer
     path = getDirectory("home") + "Desktop\\";
     return path;
 }
 
-function judge_directory_exists(directory_str){
+function judge_directory_exists(directory_str) {
     if (File.isDirectory(directory_str)) {
         return true;
     } else {
@@ -236,12 +229,12 @@ function judge_directory_exists(directory_str){
 }
 
 
-function judge_make_directory(output_folder_name){ //Check whether output_folder_name is on the desktop and if not, make one on your desktop to store the later outputs from processing
+function judge_make_directory(output_folder_name) { //Check whether output_folder_name is on the desktop and if not, make one on your desktop to store the later outputs from processing
     desktop_directory = obtain_desktop_directory();
 
     output_folder_directory = desktop_directory + output_folder_name + "\\"; //"\\" here ensures it's a folder
 
-    if (judge_directory_exists(output_folder_directory)){
+    if (judge_directory_exists(output_folder_directory)) {
         //Lines below are commented out because they are part of the auto_everything function and I don't want to see the message box every time I process an image
         // Dialog.create("Output folder has been created!");
         // Dialog.addMessage("Output folder has already been created at directory: "+output_folder_directory);
@@ -252,15 +245,16 @@ function judge_make_directory(output_folder_name){ //Check whether output_folder
     return output_folder_directory;
 }
 
-macro "setup_output_folder [s]"{
+macro
+"setup_output_folder [s]"
+{
     judge_make_directory("Fiji_output"); //Judge whether the desktop has a "Fiji_output" and if not, make that folder
     //If the folder is already there, nothing will happen
 }
 
 
-
 // Functions for setting up the tracing mode
-function get_user_mode_choice(){
+function get_user_mode_choice() {
     Dialog.create("Select a mode for outlining the cell");
     Dialog.addRadioButtonGroup("ImageJ will remember your option until you restart it.\nChoose your outlining method:", newArray("Threshold", "Manual"), 1, 2, "Manual");
 
@@ -268,14 +262,17 @@ function get_user_mode_choice(){
 
     return Dialog.getRadioButton(); // Check the result of the dialog
 }
-macro "judge_create_mode_file"{ // This is a circumvent to create a global variable
+
+macro
+"judge_create_mode_file"
+{ // This is a circumvent to create a global variable
     save_directory = judge_make_directory("Fiji_output");
     mode_file_directory = save_directory + "\\mode.txt";
 
     mode_file_judge = judge_file_exist(mode_file_directory);
-    if (mode_file_judge == true){ //You already have the mode file, so this is not your first time to run the script and thus nothing happen here
+    if (mode_file_judge == true) { //You already have the mode file, so this is not your first time to run the script and thus nothing happen here
         // Do nothing
-    }else { //This is your 1st time to run the script so set up a mode file
+    } else { //This is your 1st time to run the script so set up a mode file
         create_text_file(mode_file_directory); //Creat the mode.txt within Fiji_output
 
         mode_option = get_user_mode_choice();
@@ -286,26 +283,23 @@ macro "judge_create_mode_file"{ // This is a circumvent to create a global varia
 }
 
 
-
-
-
 //Functions for better display and slice renaming
 //These functions are automatic
-function rename_slices(){
+function rename_slices() {
     filename = get_stack_name();
 
     //1st slice is the 405 nm image
     setSlice(1);
-    run("Set Label...", "label=["+filename+"_405]");
+    run("Set Label...", "label=[" + filename + "_405]");
 
     //2nd slice is the 488 nm image
     setSlice(2);
-    run("Set Label...", "label=["+filename+"_488]");
+    run("Set Label...", "label=[" + filename + "_488]");
 
     //3rd slice is the brightfield image
-    if (nSlices > 2 ) { //This means you have a brightfield image in the stack
+    if (nSlices > 2) { //This means you have a brightfield image in the stack
         setSlice(3);
-        run("Set Label...", "label=["+filename+"_brightfield]");
+        run("Set Label...", "label=[" + filename + "_brightfield]");
     }
 }
 
@@ -365,19 +359,20 @@ function display_with_auto_contrast() { //Make the stack better displayed (incre
     }
 }
 
-macro "display_and_slice_renaming [d]" {
+macro
+"display_and_slice_renaming [d]"
+{
     rename_slices();
     display_with_auto_contrast();
     setSlice(2); //Go back to the 2nd slice for the Ex488 image, which should be the brightest so it's easier to select for the background
 }
 
 
-
-
-
 //Functions for background subtraction
 //This step requires users to select out some areas of the background and the rest of it is automatic
-macro "add_selection_to_ROI_manager [a]" { //Add current selection into ROI manager
+macro
+"add_selection_to_ROI_manager [a]"
+{ //Add current selection into ROI manager
     //If you don't have a selection before this function, you'll have an error
     run("Add Selection..."); //Add the selection to overlay but doesn't open the ROI manager and doesn't show you the update on the ROI manager
 }
@@ -401,6 +396,14 @@ function measure_background() { //Iterate through all ROI (background areas sele
     roiManager("multi-measure measure_all"); //Measure all the ROI in all slices
 
     //Measurements will go to the measurement table
+}
+
+function save_background_data() {
+    heatmap_image_name = get_stack_name();
+
+    FileName = "background_data_for_" + heatmap_image_name + ".csv";
+    save_directory = judge_make_directory("Fiji_output\\Background_data");
+    saveAs("Results", save_directory + "\\" + FileName);
 }
 
 function average_background() {
@@ -445,15 +448,12 @@ function force_close_roi_manager() {
     close("ROI Manager");
 }
 
-macro "clean_background [c]" {
+macro
+"clean_background [c]"
+{
     measure_background();
 
-
-    heatmap_image_name = get_stack_name();
-
-    FileName = "background_data_for_"+heatmap_image_name+ ".csv";
-    save_directory = judge_make_directory("Fiji_output\\Background_data");
-    saveAs("Results", save_directory + "\\"+ FileName);
+    save_background_data();
 
     avg_background = average_background();
 
@@ -469,9 +469,6 @@ macro "clean_background [c]" {
 }
 
 
-
-
-
 //Functions for set background to NaN
 function median_filter(radius_num) { //Smooth out the fuzziness
     for (i = 1; i < nSlices + 1; i++) {
@@ -483,7 +480,7 @@ function median_filter(radius_num) { //Smooth out the fuzziness
 }
 
 
-function save_selection_as_ROI(){
+function save_selection_as_ROI() {
     run("Add Selection..."); //Add the selection to overlay but doesn't open the ROI manager and doesn't show you the update on the ROI manager
 
     run("To ROI Manager");
@@ -492,32 +489,56 @@ function save_selection_as_ROI(){
 
     stack_title = get_stack_name();
     save_directory = judge_make_directory("Fiji_output\\ROI");
-    roiManager("Save", save_directory+"\\"+stack_title+".zip"); //Save as a .zip rather than a .roi here since importing .zip to ImageJ will put things into the ROI manager, while importing .roi will simply make the selection again without adding anything to the ROI manager
+    roiManager("Save", save_directory + "\\" + stack_title + ".zip"); //Save as a .zip rather than a .roi here since importing .zip to ImageJ will put things into the ROI manager, while importing .roi will simply make the selection again without adding anything to the ROI manager
 
 }
 
-function save_selection_overlaid_on_image(){
+function save_selection_overlaid_on_image() {
     stack_title = get_stack_name();
     save_directory = judge_make_directory("Fiji_output\\ROI_overlay");
 
 
     height = getHeight();
-    if (height == 2048){ //Make the stroke_thickness suitable for the corresponding image size
+    if (height == 2048) { //Make the stroke_thickness suitable for the corresponding image size
         stroke_thickness = 8;
-    }else if (height == 512){
+    } else if (height == 512) {
         stroke_thickness = 2;
-    }else{
-        print("stroke_thickness not defined for height "+height);
+    } else {
+        print("stroke_thickness not defined for height " + height);
     }
     roiManager("Set Line Width", stroke_thickness); //Make the cell trace line thicker
 
     run("Flatten", "slice"); //This will generate a new window
     //The slice option will only overlay the selection on the slice that you're seeing
 
-    saveAs("Jpeg", save_directory+"\\"+stack_title+".jpg");
+    saveAs("Jpeg", save_directory + "\\" + stack_title + ".jpg");
     close();
 }
 
+function set_background_to_NaN_core() {
+    //Create a folder to save the background as NaN images
+    stack_title = get_stack_name();
+    save_directory = judge_make_directory("Fiji_output\\Background_NaN");
+
+    //You're currently on Ex488
+    roiManager("Select", "Cell_traced");
+    run("Make Inverse"); //Now whole Ex488 background is selected
+    run("Set...", "value=NaN slice"); //Set those background pixels as NaN
+
+    run("Select None"); //Remove any selection
+
+    //Now process the Ex405
+    roiManager("Select", "Cell_traced"); //You need to select first before you move
+    setSlice(1); //Go to Ex405.
+    run("Make Inverse"); //Now whole Ex488 background is selected
+    run("Set...", "value=NaN slice");
+
+    run("Select None"); //Remove any selection
+    FileName = "Background_NaN_image_for_" + stack_title + ".tif";
+    saveAs("Tiff", save_directory + "\\" + FileName); //The whole stack will be saved together as a 32-bit. This is easier than destack, save each slice individually, and then restack
+
+    setSlice(2); //Now that all the things are done, go back to Ex488
+}
 
 function set_background_to_NaN_core_by_thresholding() { // Set background pixels to NaN by thresholding
     /* setAutoThreshold("Otsu dark no-reset");
@@ -532,60 +553,64 @@ function set_background_to_NaN_core_by_thresholding() { // Set background pixels
     //The threshold window will also have an Apply button. Don't hit on that
 
     run("Create Selection");
-    save_selection_as_ROI();
+
+    save_selection_as_ROI(); //After this line, ROI is named as "Cell_traced"
     save_selection_overlaid_on_image();
+
+    set_background_to_NaN_core(); //This will really go inside each slide and set the background as NaN
 
     //The 2 lines below remove the selection and the ROI so it doesn't interfere with the downstream of how the thresholding work
     roiManager("reset"); //Remove the selection's ROI
     run("Select None"); //Remove any selection
 
-    run("NaN Background", "slice");
+    // run("NaN Background", "slice"); //Not needed anymore since the background will be set to NaN by the codes above
     close("Threshold");
 
     close("ROI Manager"); //Close ROI manager after using save_ROI() and save_selection_overlaid_on_image()
 }
 
 
-function set_background_to_NaN_core_by_manual(){ // Set background pixels to NaN by manual drawing
+function set_background_to_NaN_core_by_manual() { // Set background pixels to NaN by manual drawing
     setTool("freehand"); //Set the selection tool to freehand, which is the most commonly used tool for outline a cell
 
     waitForUser("Manually outline the cell and hit OK");
 
-    save_selection_as_ROI(); //Save the manually drawn ROI to avoid drawing again
+    save_selection_as_ROI(); //Save the manually drawn ROI to avoid drawing again. After this line, ROI is named as "Cell_traced"
     save_selection_overlaid_on_image(); //Save the ROI overlaid on the image
+
+    set_background_to_NaN_core(); //This will really go inside each slide and set the background as NaN
+
     roiManager("show none"); //The developer of ImageJ said that you either use roiManager("reset"); (will delete ROIs from the list) or roiManager("show none"); (make ROIs invisible so use this one if you want to keep the ROIs) before close("ROI Manager"); to avoid a window pop out asking you whether you want to save the displayed ROI as an overlay?
     // For that pop out window, both "Discard" and "Save as Overlay" are non-destructive to the pixel values.
     close("ROI Manager"); //Close ROI manager after using save_ROI() and save_selection_overlaid_on_image()
 
-    run("Make Inverse"); //Select the outside of your cells, aka the background pixels
-
-    run("Set...", "value=NaN slice"); //Set those background pixels as NaN
+    //The lines below are not needed since you have the set_background_to_NaN_core();
+    // run("Make Inverse"); //Select the outside of your cells, aka the background pixels
+    //
+    // run("Set...", "value=NaN slice"); //Set those background pixels as NaN
 
     run("Select None"); //Unselect everything to avoid confusion in the next step
 }
 
 
-macro "set_background_to_NaN [x]" {
+macro
+"set_background_to_NaN [x]"
+{
     convert_to_32_bit(); //Be ready for the later image division. This allows the 32-bit data type, aka float, and also allows for the NaN data type
     median_filter(2); //Dave likes to use radius = 2 for the median filter
 
     save_directory = judge_make_directory("Fiji_output");
     mode_file_directory = save_directory + "\\mode.txt";
     mode_string = read_text_file_as_string(mode_file_directory);
-    if (mode_string == "Threshold"){
+    if (mode_string == "Threshold") {
         set_background_to_NaN_core_by_thresholding(); //This will give you very grainy outline skirts around the cells. But if you don't care about that, you can still use this function
-    }else if (mode_string == "Manual"){
+    } else if (mode_string == "Manual") {
         set_background_to_NaN_core_by_manual();
-    }else{
-        print("Something is wrong with mode set up! Your file's string is "+mode_string);
+    } else {
+        print("Something is wrong with mode set up! Your file's string is " + mode_string);
 
     }
 }
-
-
-
-
-
 
 
 //Functions for image division and generating heatmap
@@ -603,10 +628,10 @@ function image_division_image_calculator(input_image_str_1, input_image_str_2) {
     close("Image Calculator");
 }
 
-function image_division_ratio_plus(input_image_str_1, input_image_str_2){//This is the one demonstrated in the published GEVAL protocol
+function image_division_ratio_plus(input_image_str_1, input_image_str_2) {//This is the one demonstrated in the published GEVAL protocol
     //This function requires you to have Ratio Plus plug in installed first
 
-    run("Ratio Plus", "image1=["+input_image_str_1+"] image2=["+input_image_str_2+"] background1=0 clipping_value1=0 background2=0 clipping_value2=0 multiplication=1"); //The multiplication = 2 is mentioned in the paper
+    run("Ratio Plus", "image1=[" + input_image_str_1 + "] image2=[" + input_image_str_2 + "] background1=0 clipping_value1=0 background2=0 clipping_value2=0 multiplication=1"); //The multiplication = 2 is mentioned in the paper
     //The additional "[" and "]" is to handle special characters in the input_image_str_1 and input_image_str_2
 }
 
@@ -622,7 +647,9 @@ function apply_LUT(input_image_str, LUT_name_str) {
     //If you want to normalize several ratio images together you need to first combine them in a stack, so that the same minimum and maximum are applied to all ratio images uniformly
 }
 
-macro "heatmap_generation_and_save [h]" {
+macro
+"heatmap_generation_and_save [h]"
+{
     stack_title = get_stack_name();
 
     stack_to_images(); //You have to split to use the image calculator
@@ -647,9 +674,8 @@ macro "heatmap_generation_and_save [h]" {
 }
 
 
-
 // Below are additional functions to generate histogram and data for quantification check and comparison
-function histogram_data_generation_and_save(bins_num, input_stack_name){ //This should be equivalent to you click on the ratio heatmap, click Analyze -> Histogram -> List, and save the pop out result data table locally
+function histogram_data_generation_and_save(bins_num, input_stack_name) { //This should be equivalent to you click on the ratio heatmap, click Analyze -> Histogram -> List, and save the pop out result data table locally
 
     getHistogram(values, counts, bins_num); //Here a stack histogram with bins_num
     // values and counts are the things that you'll be using below to output the .csv
@@ -660,38 +686,40 @@ function histogram_data_generation_and_save(bins_num, input_stack_name){ //This 
     Table.setColumn("count", counts); //Column with histogram counts. I use "count" to be the same as if you use the GUI to output the data
 
     save_directory = judge_make_directory("Fiji_output\\Histogram_data");
-    if (input_stack_name == "individual img"){
+    if (input_stack_name == "individual img") {
         heatmap_image = locate_image_by_regex("^Heatmap.*");
         stack_name = substring(heatmap_image, 11, lengthOf(heatmap_image)); //Remove the "Heatmap of " from beginning to get the stack_name
-    }else{
+    } else {
         stack_name = input_stack_name;
     }
 
-    FileName = "histogram_data_for_"+stack_name+ ".csv";
-    saveAs("Results", save_directory + "\\"+ FileName);
+    FileName = "histogram_data_for_" + stack_name + ".csv";
+    saveAs("Results", save_directory + "\\" + FileName);
 
     close(FileName); //Close the window for the histogram data
 }
 
-function histogram_image_generation_and_save(bins_num, input_stack_name){
-    run("Histogram", "bins="+bins_num+" use x_min=0 x_max=1 y_max=Auto"); //Generate the histogram from the GUI
+function histogram_image_generation_and_save(bins_num, input_stack_name) {
+    run("Histogram", "bins=" + bins_num + " use x_min=0 x_max=1 y_max=Auto"); //Generate the histogram from the GUI
     // "x_min=0 x_max=1" because this is the ratio heatmap and all the ratios are between 0 and 1
 
     save_directory = judge_make_directory("Fiji_output\\Histogram_images");
-    if (input_stack_name=="individual img"){
+    if (input_stack_name == "individual img") {
         heatmap_image = locate_image_by_regex("^Heatmap.*");
         stack_name = substring(heatmap_image, 11, lengthOf(heatmap_image)); //Remove the "Heatmap of " from beginning to get the stack_name
-    }else{
+    } else {
         stack_name = input_stack_name;
     }
 
-    FileName = "histogram_image_for_"+stack_name+ ".tif";
-    saveAs("Tiff", save_directory + "\\"+ FileName);
+    FileName = "histogram_image_for_" + stack_name + ".tif";
+    saveAs("Tiff", save_directory + "\\" + FileName);
 
     close(FileName); //Close the window for the histogram GUI
 }
 
-macro "histogram_data_and_image_save"{
+macro
+"histogram_data_and_image_save"
+{
     bins_num = 256; // bins_num is default to be 256 (16 × 16) and I like this number. It's basically the number of columns in your histogram
     histogram_data_generation_and_save(bins_num, "individual img"); //ImageJ  macro language doesn't support optional argument so this is a circumvent. For generating histogram on the run, just use "individual img". For batch image processing, use the filename of the iterated file to replace the "individual img"
 
@@ -700,11 +728,13 @@ macro "histogram_data_and_image_save"{
 
 
 //Functions for merging heatmap and bright-field
-macro "overlay_heatmap_on_brightfield_and_save [o]"{
+macro
+"overlay_heatmap_on_brightfield_and_save [o]"
+{
     heatmap_image = locate_image_by_regex("^Heatmap.*");
     brightfield_image = locate_image_by_regex(".*brightfield$");
 
-    if (brightfield_image != "No matched image was found!"){
+    if (brightfield_image != "No matched image was found!") {
         selectImage(brightfield_image);
         run("Enhance Contrast", "saturated=0.35"); //Now that brightfield is separated from the rest of the images, you can do this adjustment on it
 
@@ -719,79 +749,78 @@ macro "overlay_heatmap_on_brightfield_and_save [o]"{
 }
 
 
-
 //Functions for making and saving the montage
-macro "montage_generation_and_save [m]" {
+macro
+"montage_generation_and_save [m]"
+{
     //Try to reobtain the stack_name from the heatmap's image name
     heatmap_image = locate_image_by_regex("^Heatmap.*");
 
     stack_name = substring(heatmap_image, 11, lengthOf(heatmap_image)); //Remove the "Heatmap of " from beginning to get the stack_name
 
-    if (nImages > 3){
-        run("Merge Channels...", "c1=["+stack_name+"_405] c2=["+stack_name+"_488] c3=["+stack_name+"_brightfield] c4=[Heatmap of "+stack_name+"] create keep");
+    if (nImages > 3) {
+        run("Merge Channels...", "c1=[" + stack_name + "_405] c2=[" + stack_name + "_488] c3=[" + stack_name + "_brightfield] c4=[Heatmap of " + stack_name + "] create keep");
         //Making merge channel image is the only way to have different LUT on different slices of a stack
-    } else{
-        run("Merge Channels...", "c1=["+stack_name+"_405] c2=["+stack_name+"_488] c3=[Heatmap of "+stack_name+"] create keep");
+    } else {
+        run("Merge Channels...", "c1=[" + stack_name + "_405] c2=[" + stack_name + "_488] c3=[Heatmap of " + stack_name + "] create keep");
     }
 
 
     //Rename slices
     //1st slice is the 405 nm image
     setSlice(1);
-    run("Set Label...", "label=["+stack_name+"_405]");
+    run("Set Label...", "label=[" + stack_name + "_405]");
 
     //2nd slice is the 488 nm image
     setSlice(2);
-    run("Set Label...", "label=["+stack_name+"_488]");
+    run("Set Label...", "label=[" + stack_name + "_488]");
 
 
-    if (nImages > 5){
+    if (nImages > 5) {
         //3rd slice is the brightfield image
         setSlice(3);
-        run("Set Label...", "label=["+stack_name+"_brightfield]");
+        run("Set Label...", "label=[" + stack_name + "_brightfield]");
 
         //4th slice is the ratio heatmap
         setSlice(4);
-        run("Set Label...", "label=["+stack_name+"_heatmap]");
-    } else{
+        run("Set Label...", "label=[" + stack_name + "_heatmap]");
+    } else {
         //4th slice is the ratio heatmap
         setSlice(3);
-        run("Set Label...", "label=["+stack_name+"_heatmap]");
+        run("Set Label...", "label=[" + stack_name + "_heatmap]");
     }
 
     Stack.setDisplayMode("color"); //Change the display mode from composite to color so the 1st image of the montage result is correct. This doesn't change the image type
 
-    if (nSlices > 3){
+    if (nSlices > 3) {
         run("Make Montage...", "columns=2 rows=2 scale=1 label");
         //"label" means label the montage using the slice names
         //The resulting montage will be a RGB image
-    }else{
+    } else {
         run("Make Montage...", "columns=3 rows=1 scale=1 label");
         //"label" means label the montage using the slice names
         //The resulting montage will be a RGB image
     }
 
 
-
-    montage_filename = "Montage of "+stack_name;
+    montage_filename = "Montage of " + stack_name;
     rename_image("Montage", montage_filename);
 
     save_directory = judge_make_directory("Fiji_output\\Montage_images");
     image_name_str = locate_image_by_regex("^Montage.*");
     format_array = newArray("Tiff", "Jpeg");
-    save_images(save_directory, image_name_str,format_array);
+    save_images(save_directory, image_name_str, format_array);
     close(montage_filename);
 }
 
 
-
 //Functions for finishing things up
-function save_processed_stack(){
+function save_processed_stack() {
     //Try to reobtain the stack_name from the heatmap's image name
     heatmap_image = locate_image_by_regex("^Heatmap.*");
     stack_name = substring(heatmap_image, 11, lengthOf(heatmap_image)); //Remove the "Heatmap of " from beginning to get the stack_name
 
-    processed_stack_name = "Processed stack of "+stack_name;
+    processed_stack_name = "Processed stack of " + stack_name;
     rename_image("Composite", processed_stack_name);
 
     save_directory = judge_make_directory("Fiji_output\\Processed_stacks");
@@ -800,7 +829,9 @@ function save_processed_stack(){
     close(processed_stack_name);
 }
 
-macro "finish_up [f]"{
+macro
+"finish_up [f]"
+{
     save_processed_stack();
 
     heatmap_image = locate_image_by_regex("^Heatmap.*");
@@ -808,16 +839,18 @@ macro "finish_up [f]"{
     stack_name = heatmap_image_name_array[1];
 
     //Close up all remaining windows from processing this stack
-    close_windows_array = locate_images_by_regex("^"+stack_name+".*");
+    close_windows_array = locate_images_by_regex("^" + stack_name + ".*");
     close_windows_array = append_to_array(close_windows_array, heatmap_image);
-    for(i = 0; i < close_windows_array.length; i++){
+    for (i = 0; i < close_windows_array.length; i++) {
         close(close_windows_array[i]);
     }
 }
 
 
 //Functions to auto the whole process together
-macro "auto_everything [z]" {
+macro
+"auto_everything [z]"
+{
     run("setup_output_folder [s]");
 
     run("judge_create_mode_file"); //This will only run once to ask the user to set the cell-outlining mode
@@ -845,23 +878,21 @@ macro "auto_everything [z]" {
 }
 
 
-
-
 //Functions to normalize all the ratio heatmaps
-function pick_a_directory(){
+function pick_a_directory() {
     path = getDirectory("Choose a Directory"); //This will open the file dialogue
 
     return path;
 }
 
-function filter_files(input_directory_str, regex_str){
+function filter_files(input_directory_str, regex_str) {
     file_list = getFileList(input_directory_str);
     output_file_array = newArray();
 
     // Loop through the files and open the ones that match the regex pattern
     for (i = 0; i < file_list.length; i++) {
         if (matches(file_list[i], regex_str)) {
-            output_file_array = append_to_array(output_file_array, input_directory_str + "\\" +file_list[i]);
+            output_file_array = append_to_array(output_file_array, input_directory_str + "\\" + file_list[i]);
 
         }
     }
@@ -869,28 +900,30 @@ function filter_files(input_directory_str, regex_str){
     return output_file_array;
 }
 
-function batch_open_files(file_directories_array){
+function batch_open_files(file_directories_array) {
     for (i = 0; i < file_directories_array.length; i++) {
         open(file_directories_array[i]);
     }
 }
 
-function normalize_heatmaps (){
+function normalize_heatmaps() {
     run("Images to Stack", "use"); //Make the stack
     run("Enhance Contrast...", "saturated=0.40 normalize"); //You should only normalize this within a group not all the images in 1 batch of experiment.
 }
 
-function rename_heatmaps(){
+function rename_heatmaps() {
     rename_image("Stack", "Normalized heatmaps");
     for (i = 1; i < nSlices + 1; i++) { //Rename slices of the stack
         setSlice(i);
         old_slice_name = getInfo("slice.label");
         new_slice_name = replace(old_slice_name, "Heatmap", "Normalized heatmap");
-        run("Set Label...", "label=["+new_slice_name+"]");
+        run("Set Label...", "label=[" + new_slice_name + "]");
     }
 }
 
-macro "normalize_and_save_heatmaps [n]" {
+macro
+"normalize_and_save_heatmaps [n]"
+{
     input_folder_directory = pick_a_directory(); //Ask user to locate the folder that contains all the ratio heatmaps
 
     heatmap_files_array = filter_files(input_folder_directory, "^Heatmap.*.tif$");
@@ -918,12 +951,11 @@ macro "normalize_and_save_heatmaps [n]" {
 }
 
 
-
 // Functions to batch process images
 // For all these functions, please follow the pattern of asking the user to select an input folder to generate an array of file directories, iterate through the array to open the image, process, output, and close the image. Doing this (rather than opening all the images at once and process them one by one) can avoid memory crowd up issues, which can lead to weird behaviours like the loop always stop at the half way
 
 // Functions to batch output histogram data and histogram generated by ImageJ GUI
-function output_histogram_data_and_img(input_file_directory){
+function output_histogram_data_and_img(input_file_directory) {
     open(input_file_directory);
 
     heatmap_image = get_stack_name();
@@ -933,10 +965,12 @@ function output_histogram_data_and_img(input_file_directory){
     histogram_data_generation_and_save(bins_num, stack_name);
     histogram_image_generation_and_save(bins_num, stack_name);
 
-    close(heatmap_image+".tif"); //Close the image
+    close(heatmap_image + ".tif"); //Close the image
 }
 
-macro "batch_output_histogram_data_and_img" {
+macro
+"batch_output_histogram_data_and_img"
+{
     input_folder_directory = pick_a_directory(); //Ask user to locate the folder that contains all the ratio heatmaps
     heatmap_files_array = filter_files(input_folder_directory, "^Heatmap.*.tif$");
 
