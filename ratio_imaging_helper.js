@@ -550,19 +550,19 @@ function set_background_to_NaN_core() {
     FileName = "Background_NaN_image_for_" + stack_title + ".tif";
     saveAs("Tiff", save_directory + "\\" + FileName); //The whole stack will be saved together as a 32-bit. This is easier than destack, save each slice individually, and then restack
 
-    rename(stack_title+".ims"); //Rename back the image since the saveAs will change the file name
+    rename(stack_title + ".ims"); //Rename back the image since the saveAs will change the file name
 
     save_shape_channels_data(); //Save the shape measurements on the 2 channels
 
     setSlice(2); //Now that all the things are done, go back to Ex488
 }
 
-function save_channels_histogram_data_and_image(){
+function save_channels_histogram_data_and_image() {
     stack_title = get_stack_name();
     setSlice(1);
-    histogram_data_and_image_save(256, stack_title,"background_NaN_405");
+    histogram_data_and_image_save(256, stack_title, "background_NaN_405");
     setSlice(2);
-    histogram_data_and_image_save(256, stack_title,"background_NaN_488");
+    histogram_data_and_image_save(256, stack_title, "background_NaN_488");
 }
 
 function set_background_to_NaN_core_by_thresholding() { // Set background pixels to NaN by thresholding
@@ -678,6 +678,24 @@ function apply_LUT(input_image_str, LUT_name_str) {
     //If you want to normalize several ratio images together you need to first combine them in a stack, so that the same minimum and maximum are applied to all ratio images uniformly
 }
 
+function save_shape_heatmap_data() {
+    image_name_str = locate_image_by_regex("^Heatmap.*");
+    selectImage(image_name_str);
+    roiManager("Select", "Cell_traced");
+    run("Measure"); //Measure the shape on heatmap
+    //Since the heatmap doesn't have a scale, the unit for the area that you measured is pixels. Setting the scale is a bit more complicated so it's skipped.
+
+    FileName = "shape_heatmap_data_for_" + image_name_str + ".csv";
+    save_directory = judge_make_directory("Fiji_output\\Shape_data");
+    saveAs("Results", save_directory + "\\" + FileName);
+
+    close("Results");
+    roiManager("show none");
+    run("Select None"); //Remove any selection
+    roiManager("reset"); //Remove the selection's ROI
+    close("ROI Manager");
+}
+
 macro
 "heatmap_generation_and_save [h]"
 {
@@ -697,6 +715,8 @@ macro
 
     // print(stack_title); // For debugging
     rename_image(result_image, "Heatmap of " + stack_title);
+
+    save_shape_heatmap_data();
 
     save_directory = judge_make_directory("Fiji_output\\Heatmap_images");
     image_name_str = locate_image_by_regex("^Heatmap.*");
@@ -895,7 +915,7 @@ macro
 
     run("heatmap_generation_and_save [h]");
 
-    histogram_data_and_image_save(256, "individual img","heatmap"); // bins_num is default to be 256 (16 × 16) and I like this number. It's basically the number of columns in your histogram
+    histogram_data_and_image_save(256, "individual img", "heatmap"); // bins_num is default to be 256 (16 × 16) and I like this number. It's basically the number of columns in your histogram
 
     if (nImages > 3) { //Only overlay the heatmap on brightfield when you have the brightfield (nImages = 4 in this case)
         run("overlay_heatmap_on_brightfield_and_save [o]");
