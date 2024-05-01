@@ -805,13 +805,13 @@ macro
     //Try to reobtain the stack_name from the heatmap's image name
     heatmap_image = locate_image_by_regex("^Heatmap.*");
 
-    stack_name = substring(heatmap_image, 36, lengthOf(heatmap_image)); //Remove the "Heatmap of " from beginning to get the stack_name
+    stack_name = substring(heatmap_image, lengthOf("Heatmap of "), lengthOf(heatmap_image)); //Remove the "Heatmap of " from beginning to get the stack_name
 
     if (nImages > 3) {
         run("Merge Channels...", "c1=[" + stack_name + "_405] c2=[" + stack_name + "_488] c3=[" + stack_name + "_brightfield] c4=[Heatmap of " + stack_name + "] create keep");
         //Making merge channel image is the only way to have different LUT on different slices of a stack
     } else {
-        run("Merge Channels...", "c1=[" + stack_name + "_405] c2=[" + stack_name + "_488] c3=[Heatmap of Background_NaN_image_for_" + stack_name + "] create keep");
+        run("Merge Channels...", "c1=[" + stack_name + "_405] c2=[" + stack_name + "_488] c3=[Heatmap of " + stack_name + "] create keep");
     }
 
 
@@ -867,7 +867,7 @@ macro
 function save_processed_stack() {
     //Try to reobtain the stack_name from the heatmap's image name
     heatmap_image = locate_image_by_regex("^Heatmap.*");
-    stack_name = substring(heatmap_image, 36, lengthOf(heatmap_image)); //Remove the "Heatmap of " from beginning to get the stack_name
+    stack_name = substring(heatmap_image, lengthOf("Heatmap of "), lengthOf(heatmap_image)); //Remove the "Heatmap of " from beginning to get the stack_name
 
     processed_stack_name = "Processed stack of " + stack_name;
     rename_image("Composite", processed_stack_name);
@@ -885,7 +885,7 @@ macro
 
     heatmap_image = locate_image_by_regex("^Heatmap.*");
 
-    stack_name = substring(heatmap_image, lengthOf("Heatmap of Background_NaN_image_for_"), lengthOf(heatmap_image));
+    stack_name = substring(heatmap_image, lengthOf("Heatmap of "), lengthOf(heatmap_image));
 
     //Close up all remaining windows from processing this stack
     close_windows_array = locate_images_by_regex("^" + stack_name + ".*");
