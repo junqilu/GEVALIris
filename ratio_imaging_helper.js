@@ -515,6 +515,17 @@ function save_selection_overlaid_on_image() {
     close();
 }
 
+function save_shape_channels_data() {
+    heatmap_image_name = get_stack_name();
+
+    FileName = "shape_channels_data_for_" + heatmap_image_name + ".csv";
+    save_directory = judge_make_directory("Fiji_output\\Shape_data");
+    saveAs("Results", save_directory + "\\" + FileName);
+
+    close("Results");
+    //In your saved results, you should see all the parameters related to intensity are different (like Mean) and all the parameters related to shape are the same (like Area); otherwise, something is wrong
+}
+
 function set_background_to_NaN_core() {
     //Create a folder to save the background as NaN images
     stack_title = get_stack_name();
@@ -522,6 +533,7 @@ function set_background_to_NaN_core() {
 
     //You're currently on Ex488
     roiManager("Select", "Cell_traced");
+    run("Measure"); //Measure the shape on Ex488 since this can be very conveniently done here
     run("Make Inverse"); //Now whole Ex488 background is selected
     run("Set...", "value=NaN slice"); //Set those background pixels as NaN
 
@@ -530,12 +542,15 @@ function set_background_to_NaN_core() {
     //Now process the Ex405
     roiManager("Select", "Cell_traced"); //You need to select first before you move
     setSlice(1); //Go to Ex405.
+    run("Measure"); //Measure the shape on Ex488 since this can be very conveniently done here
     run("Make Inverse"); //Now whole Ex488 background is selected
     run("Set...", "value=NaN slice");
 
     run("Select None"); //Remove any selection
     FileName = "Background_NaN_image_for_" + stack_title + ".tif";
     saveAs("Tiff", save_directory + "\\" + FileName); //The whole stack will be saved together as a 32-bit. This is easier than destack, save each slice individually, and then restack
+
+    save_shape_channels_data(); //Save the shape measurements on the 2 channels
 
     setSlice(2); //Now that all the things are done, go back to Ex488
 }
