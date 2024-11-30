@@ -20,6 +20,7 @@ This directory stores the code for helping user process the images of cells expr
 4. Enjoy your high-speed analysis! 
 
 Watch the live demo of GEVALIris works here: https://youtu.be/aysFCivxEpw?t=1
+[<img src="readme_images/GEVALIris_demo_screenshot.png">](https://youtu.be/aysFCivxEpw?t=1)
 
 ## Code behaviour explanation 
 
