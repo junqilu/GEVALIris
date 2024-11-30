@@ -1,36 +1,41 @@
-# AstrocyteMelanomaCoCulture
-This directory stores the code for processing the images of astrocyte-melanoma co-culture. 
-* Because ImageJ macro language is very similar to JavaScript, all the codes are in .js format during development in WebStorm
+# GEVALMiner
+This directory stores the code for helping user process the images of cells expressing GTP evaluators (GEVAL). 
+* This plugin was developed based on a Nature paper from Nikiforov lab (https://www.nature.com/articles/s41467-021-26324-6) and the corresponding  Biomedical Engineering Technologies protocol (https://pubmed.ncbi.nlm.nih.gov/35094327/).
+* Because ImageJ macro language is very similar to JavaScript, all the codes were developed in JavaScript in WebStorm. 
 
-## Requirements for the input images
-* All input files should be .ims
-* After being imported, it should be a stack of 3 slices: The stack needs to follow this order for the images 
-  1. Image taken at 405 nm excitation 
-  2. Image taken at 488 nm excitation 
-  3. Bright-field
-     * New code can take cares of stacks without brightfields so this is optional
+##  Input image requirements
+* All input files need to be in .ims format.
+* After being imported, it should be a stack of 3 slices in the following order: 
+  1. Image taken at 405 nm excitation.
+  2. Image taken at 488 nm excitation. 
+  3. (Optional) Bright-field.
+     
 
-## Use
-1. Donwload the .js file locally and rename the extension to .ijm
-2. From ImageJ -> Plugins -> Macros -> Install to install this .ijm
-3. Enjoy
+## Installation & use 
+1. Download the `ratio_imaging_helper.js` file locally and rename the file to `ratio_imaging_helper.ijm`.
+2. From ImageJ -> Plugins -> Macros -> Install to install this `ratio_imaging_helper.ijm`.
+3. From ImageJ -> Plugins -> Macros, you can see all the installed macros with the corresponding shortcut key in `[]`.
+    * For common use, run `auto_everything` or press `Z`.
+    * For debugging in a step-by-step manner, run each macro or press the corresponding key in order.
+4. Enjoy your high-speed analysis! 
 
-## Code
-The code was developed based on this paper: https://pubmed.ncbi.nlm.nih.gov/35094327/
 
-Below are the sections about what the code is doing
+
+## Code behaviour explanation 
 
 ### Image processing for 1 image
 All the steps below have been incorporated into 1 big macro where it only requires human users to do 2 things: 
-* Select out background areas and add them into ROI manager
-* Adjust the bar for the threshold so the outline of cells can be determined
+* Select out background areas by 3 rectangles . 
+* Depending on the tracing mode...
+  * If in threshold mode, adjust the bar for the threshold so the outline of cells can be determined. 
+  * If in the tracing mode, manually trace the outline of the cell 
 
 #### Better display and slice renaming
-The raw .ims file is very black so this part of the code adjust the contrast automatically so the image is visible for the human eyes
-* This doesn't change the raw data
-* This excludes the bright-field image
+The raw .ims file tends to be very black. This part of the code adjusts the contrast on each channel automatically so the image is visible for the human eyes.
+* This doesn't change the raw image data. 
+* This excludes the bright-field image automatically. 
 
-Additionally, this part of the code also rename slices using 405, 488, and brightfield, so they're easier to refer later
+This part of the code also renames slices using "405", "488", and "brightfield", so they're easier to refer later. 
 
 #### Background subtraction 
 This section asks the user to make some selections on the background (can be done by the rectangle selection tool) in whatever number they like (3 selections are enough). Then an average intensity will be calculated from these selections and the average value will be used for subtraction from all the pixels
