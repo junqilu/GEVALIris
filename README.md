@@ -25,7 +25,7 @@ Watch the live demo of GEVALIris works here: https://youtu.be/aysFCivxEpw?t=1
 ## Code behaviour explanation 
 
 ### GEVALIris workflow abstract
-![GEVALIris_workflow.png](GEVALIris_workflow.png)
+![GEVALIris_workflow.png](readme_images/GEVALIris_workflow.png)
 
 ### Image processing for 1 image
 All the steps below have been incorporated into 1 big macro where it only requires human users to do 2 things: 
