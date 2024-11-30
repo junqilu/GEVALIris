@@ -12,8 +12,8 @@ This directory stores the code for helping user process the images of cells expr
      
 
 ## Installation & use 
-1. Download the `ratio_imaging_helper.js` file locally and rename the file to `ratio_imaging_helper.ijm`.
-2. From ImageJ -> Plugins -> Macros -> Install to install this `ratio_imaging_helper.ijm`.
+1. Download the `GEVALIris.js` file locally and rename the file to `GEVALIris.ijm`.
+2. From ImageJ -> Plugins -> Macros -> Install to install this `GEVALIris.ijm`.
 3. From ImageJ -> Plugins -> Macros, you can see all the installed macros with the corresponding shortcut key in `[]`.
     * For common use, run `auto_everything` or press `Z`.
     * For debugging in a step-by-step manner, run each macro or press the corresponding key in order.
