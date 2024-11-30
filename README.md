@@ -1,4 +1,4 @@
-# GEVALMiner
+# GEVALIris
 This directory stores the code for helping user process the images of cells expressing GTP evaluators (GEVAL). 
 * This plugin was developed based on a Nature paper from Nikiforov lab (https://www.nature.com/articles/s41467-021-26324-6) and the corresponding  Biomedical Engineering Technologies protocol (https://pubmed.ncbi.nlm.nih.gov/35094327/).
 * Because ImageJ macro language is very similar to JavaScript, all the codes were developed in JavaScript in WebStorm. 
