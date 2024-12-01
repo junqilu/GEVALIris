@@ -1,6 +1,6 @@
 # GEVALIris
 This directory stores the codes of the ImageJ plugin, GEVALIris, for helping user process the images of cells expressing GTP evaluators (GEVAL) and extract features out from these images. The extracted image features can then be used for image filtering with the machine learning model [GEVALytics](https://github.com/junqilu/GEVALytics). 
-* This plugin was developed based on a [Nature paper](https://www.nature.com/articles/s41467-021-26324-6) from Nikiforov lab  in the Biomedical Engineering Department at Duke University and the corresponding Biomedical Engineering Technologies [protocol](https://pubmed.ncbi.nlm.nih.gov/35094327/).
+* This plugin was developed based on a [Nature paper](https://www.nature.com/articles/s41467-021-26324-6) from Nikiforov lab in the Biomedical Engineering Department at Duke University and the corresponding Biomedical Engineering Technologies [protocol](https://pubmed.ncbi.nlm.nih.gov/35094327/).
 * Because ImageJ macro language is very similar to JavaScript, all the codes were developed in JavaScript using WebStorm for more efficient editing. 
 
 ##  Input image requirements
@@ -12,11 +12,11 @@ This directory stores the codes of the ImageJ plugin, GEVALIris, for helping use
      
 
 ## Installation & use 
-1. Download the `GEVALIris.js` file locally and rename the file to `GEVALIris.ijm`.
-2. From ImageJ -> Plugins -> Macros -> Install to install this `GEVALIris.ijm`.
-3. From ImageJ -> Plugins -> Macros, you can see all the installed macros with the corresponding shortcut key in `[]`.
-    * For common use, run `auto_everything` or press `Z`.
-    * For debugging in a step-by-step manner, run each macro or press the corresponding key in order.
+1. Download the `GEVALIris.js` file locally and rename the file to `GEVALIris.ijm`
+2. From ImageJ -> Plugins -> Macros -> Install to install this `GEVALIris.ijm`
+3. From ImageJ -> Plugins -> Macros, you can see all the installed macros with the corresponding shortcut key in `[]`
+    * For common use, run `auto_everything` or press `Z`
+    * For debugging in a step-by-step manner, run each macro or press the corresponding key in order
 4. Enjoy your high-speed analysis! 
 
 Watch the live demo of GEVALIris works here: https://youtu.be/aysFCivxEpw
