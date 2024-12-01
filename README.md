@@ -1,7 +1,7 @@
 # GEVALIris
-This directory stores the code for helping user process the images of cells expressing GTP evaluators (GEVAL). 
-* This plugin was developed based on a Nature paper from Nikiforov lab (https://www.nature.com/articles/s41467-021-26324-6) and the corresponding  Biomedical Engineering Technologies protocol (https://pubmed.ncbi.nlm.nih.gov/35094327/).
-* Because ImageJ macro language is very similar to JavaScript, all the codes were developed in JavaScript in WebStorm. 
+This directory stores the codes of the ImageJ plugin, GEVALIris, for helping user process the images of cells expressing GTP evaluators (GEVAL) and extract features out from these images. The extracted image features can then be used for image filtering with the machine learning model [GEVALytics](https://github.com/junqilu/GEVALytics). 
+* This plugin was developed based on a [Nature paper](https://www.nature.com/articles/s41467-021-26324-6) from Nikiforov lab  in the Biomedical Engineering Department at Duke University and the corresponding Biomedical Engineering Technologies [protocol](https://pubmed.ncbi.nlm.nih.gov/35094327/).
+* Because ImageJ macro language is very similar to JavaScript, all the codes were developed in JavaScript using WebStorm for more efficient editing. 
 
 ##  Input image requirements
 * All input files need to be in .ims format.
@@ -19,8 +19,8 @@ This directory stores the code for helping user process the images of cells expr
     * For debugging in a step-by-step manner, run each macro or press the corresponding key in order.
 4. Enjoy your high-speed analysis! 
 
-Watch the live demo of GEVALIris works here: https://youtu.be/aysFCivxEpw?t=1
-[<img src="readme_images/GEVALIris_demo_screenshot.png">](https://youtu.be/aysFCivxEpw?t=1)
+Watch the live demo of GEVALIris works here: https://youtu.be/aysFCivxEpw
+[<img src="readme_images/GEVALIris_demo_screenshot.png">](https://youtu.be/aysFCivxEpw)
 
 ## Code behaviour explanation 
 
@@ -28,11 +28,12 @@ Watch the live demo of GEVALIris works here: https://youtu.be/aysFCivxEpw?t=1
 ![GEVALIris_workflow.png](readme_images/GEVALIris_workflow.png)
 
 ### Image processing for 1 image
-All the steps below have been incorporated into 1 big macro where it only requires human users to do 2 things: 
-* Select out background areas by 3 rectangles . 
+All the steps below have been incorporated into 1 big macro where it only requires human users to do 3 things: 
+* Select a tracing mode, either via threshold or done manually
+* Select out background areas by 3 rectangles
 * Depending on the tracing mode...
   * If in threshold mode, adjust the bar for the threshold so the outline of cells can be determined. 
-  * If in the tracing mode, manually trace the outline of the cell 
+  * If in the manual tracing mode, manually trace the outline of the cell 
 
 #### Better display and slice renaming
 The raw .ims file tends to be very black. This part of the code adjusts the contrast on each channel automatically so the image is visible for the human eyes.
