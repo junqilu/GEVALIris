@@ -9,15 +9,20 @@ This directory stores the codes of the ImageJ plugin, GEVALIris, for helping use
   1. Image taken at 405 nm excitation.
   2. Image taken at 488 nm excitation. 
   3. (Optional) Bright-field.
-     
 
-## Installation & use 
-1. Download the `GEVALIris.js` file locally and rename the file to `GEVALIris.ijm`
-2. From ImageJ -> Plugins -> Macros -> Install to install this `GEVALIris.ijm`
-3. From ImageJ -> Plugins -> Macros, you can see all the installed macros with the corresponding shortcut key in `[]`
+## Package requirements
+__Ratio plus__: https://imagej.net/ij/plugins/ratio-plus.html
+* Installation:	Download Ratio_Plus.class from the link to the plugins folder, or subfolder, and restart ImageJ.
+
+## Installation & use
+1. Download the `GEVALIris.js` file locally from this GitHub page and rename the file's extension to `GEVALIris.ijm`
+1. From ImageJ -> Plugins -> Macros -> Install to install this `GEVALIris.ijm`
+1. Drag and drop an image file (preferred in the format of `.ims`) into ImageJ
+1. In the menu of `Bio-Formats Import Options`, for the `View stack with` field, ensure to use the `Standard ImageJ` option
+1. From ImageJ -> Plugins -> Macros, you can see all the installed macros with the corresponding shortcut key in `[]`
     * For common use, run `auto_everything` or press `Z`
     * For debugging in a step-by-step manner, run each macro or press the corresponding key in order
-4. Enjoy your high-speed analysis! 
+1. Enjoy your high-speed analysis! 
 
 Watch the live demo of GEVALIris works here: https://youtu.be/aysFCivxEpw
 [<img src="readme_images/GEVALIris_demo_screenshot.png">](https://youtu.be/aysFCivxEpw)
