@@ -501,7 +501,9 @@ function save_selection_overlaid_on_image() {
     height = getHeight();
     if (height == 2048) { //Make the stroke_thickness suitable for the corresponding image size
         stroke_thickness = 8;
-    } else if (height == 512) {
+    } else if (height == 1024){
+        stroke_thickness = 4;
+    }else if (height == 512) {
         stroke_thickness = 2;
     } else {
         print("stroke_thickness not defined for height " + height);
