@@ -51,6 +51,14 @@ function print_array(input_array) { //Iterate through input_array to print out e
     }
 }
 
+function judge_in_array(value, input_array) { //Judge if a value is in input_array
+    for (i = 0; i < input_array.length; i++) {
+        if (input_array[i] == value)
+            return true;
+    }
+    return false;
+}
+
 function append_to_array(input_array, append_value) { //ImageJ script seems to lack a very basic append to an array function
     // input_array = Array.concat(input_array, append_value); //This doesn't work in some places since JavaScript passes arrays by reference and this line doesn't modify the input_array in place. When you reassign input_array, it creates a new local variable that doesn't affect the original array
 
@@ -245,6 +253,23 @@ function judge_make_directory(output_folder_name) { //Check whether output_folde
     return output_folder_directory;
 }
 
+function delete_folder_recursive(dir) { //File.delete() cannot delete non-empty folders. This function can
+    list = getFileList(dir);
+
+    for (i = 0; i < list.length; i++) {
+        path = dir + list[i];
+
+        if (endsWith(list[i], "/")) {
+            delete_folder_recursive(path);
+        } else {
+            File.delete(path);
+        }
+    }
+
+    File.delete(dir);
+}
+
+// Below are tje macros for GEVALIris
 macro
 "setup_output_folder [s]"
 {
@@ -501,9 +526,9 @@ function save_selection_overlaid_on_image() {
     height = getHeight();
     if (height == 2048) { //Make the stroke_thickness suitable for the corresponding image size
         stroke_thickness = 8;
-    } else if (height == 1024){
+    } else if (height == 1024) {
         stroke_thickness = 4;
-    }else if (height == 512) {
+    } else if (height == 512) {
         stroke_thickness = 2;
     } else {
         print("stroke_thickness not defined for height " + height);
@@ -998,6 +1023,65 @@ macro
         selectImage(normalized_heatmaps[i]); //You must select that image to activate. Otherwise, you'll have the same image saved several times with different file names
         save_images(save_directory, normalized_heatmaps[i], heatmap_format_array);
         close(normalized_heatmaps[i]);
+    }
+}
+
+
+macro
+"clean up working directory [v]"
+{
+    desktop_directory = obtain_desktop_directory();
+    output_folder_directory = desktop_directory + "Fiji_output" + "\\";
+
+    keep = newArray( //These are the directories to keep
+        "heatmap_images",
+        "processed_stacks",
+        "ROI_overlay"
+    );
+
+    child_list = getFileList(output_folder_directory); //Obtain all the sub from output_folder_directory
+
+    to_delete = newArray();
+    count = 0;
+
+    for (i = 0; i < child_list.length; i++) {
+        name = child_list[i];
+
+        if (endsWith(name, "/")) { //Folders will have "/" after their name
+            folder_name = substring(name, 0, lengthOf(name) - 1);
+
+            if (!judge_in_array(folder_name, keep)) {
+                to_delete[count] = output_folder_directory + folder_name + "/";
+                count++;
+            }
+        } else { //These are files. In this case, it should only be the Fiji_output/mode.txt
+            if (name == "mode.txt") { //Extra protection just in case
+                to_delete[count] = output_folder_directory + name;
+                count++;
+            }
+        }
+    }
+
+    if (to_delete.length == 0) {
+        showMessage("Cleanup", "No folders to delete.");
+        exit();
+    }else{
+        msg = "";
+        for (i = 0; i < to_delete.length; i++) {
+            msg += to_delete[i] + "\n";
+        }
+        showMessageWithCancel("Confirm Deletion",
+            "The following folders will be deleted:\n" + msg + "\nClick OK to proceed.");
+        //If user clicks Cancel, nothing will be deleted
+
+        for (i = 0; i < to_delete.length; i++) { //This only runs after the user clicks OK from the previous message window
+            delete_folder_recursive(to_delete[i]);
+        }
+
+        if (isOpen("Log")) { //Force to close the log window
+            selectWindow("Log");
+            run("Close");
+        }
     }
 }
 
