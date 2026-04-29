@@ -22,6 +22,7 @@ __Ratio plus__: https://imagej.net/ij/plugins/ratio-plus.html
 1. From ImageJ -> Plugins -> Macros, you can see all the installed macros with the corresponding shortcut key in `[]`
     * For common use, run `auto_everything` or press `Z`
     * For debugging in a step-by-step manner, run each macro or press the corresponding key in order
+    * (Optional) For cleaning up resulting sub folders and only keep the core ones (aka, __Heatmap_images__, __Processed_stacks__, __ROI_overlay__), run `clean_up_working_directory` or press `V`
 1. Enjoy your high-speed analysis! 
 
 Watch the live demo of GEVALIris works here: https://youtu.be/aysFCivxEpw
@@ -83,3 +84,9 @@ The code will create a folder called __Fiji_output__ on the desktop, if that fol
 | Montage_images              | Both .jpg & .tif of 2 × 2 montage of 405 nm channel, 488 channel, brightfield, & ratio heatmap | Both .jpg & .tif of 1 × 3 monatge of 405 nm channel, 488 nm channel, & ratio heatmap |
 | Processed_stacks            | 1 .tif                                                                                         | 1 .tif                                                                               |
 | ROI                         | 1 .zip                                                                                         | 1 .zip                                                                               |
+# Licence & Citation
+Copyright (c) 2026 Junqi Lu.
+
+This tool is distributed under an MIT licence. Please consult the LICENSE file for more details.
+
+Citation can be found on the right side menu bar of this GitHub page by clicking "Cite this repository"
