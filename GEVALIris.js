@@ -1028,14 +1028,14 @@ macro
 
 
 macro
-"clean up working directory [v]"
+"clean_up_working_directory [v]"
 {
     desktop_directory = obtain_desktop_directory();
     output_folder_directory = desktop_directory + "Fiji_output" + "\\";
 
     keep = newArray( //These are the directories to keep
-        "heatmap_images",
-        "processed_stacks",
+        "Heatmap_images",
+        "Processed_stacks",
         "ROI_overlay"
     );
 
@@ -1065,7 +1065,7 @@ macro
     if (to_delete.length == 0) {
         showMessage("Cleanup", "No folders to delete.");
         exit();
-    }else{
+    } else {
         msg = "";
         for (i = 0; i < to_delete.length; i++) {
             msg += to_delete[i] + "\n";
